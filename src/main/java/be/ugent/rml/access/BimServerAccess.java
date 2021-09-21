@@ -2,15 +2,11 @@ package be.ugent.rml.access;
 
 import org.bimserver.client.BimServerClient;
 import org.bimserver.client.json.JsonBimServerClientFactory;
-import org.bimserver.interfaces.objects.SDeserializerPluginConfiguration;
-import org.bimserver.interfaces.objects.SProject;
-import org.bimserver.interfaces.objects.SSerializerPluginConfiguration;
+import org.bimserver.database.queries.om.DefaultQueries;
+import org.bimserver.interfaces.objects.*;
 import org.bimserver.shared.ChannelConnectionException;
 import org.bimserver.shared.UsernamePasswordAuthenticationInfo;
-import org.bimserver.shared.exceptions.PublicInterfaceNotFoundException;
-import org.bimserver.shared.exceptions.ServerException;
-import org.bimserver.shared.exceptions.ServiceException;
-import org.bimserver.shared.exceptions.UserException;
+import org.bimserver.shared.exceptions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +41,6 @@ public class BimServerAccess implements Access {
             SProject project = client.getServiceInterface().addProject(randomName, "ifc2x3tc1");
 
             long poid = project.getOid();
-            String comment = "This is a comment";
 
             // This method is an easy way to find a compatible deserializer for the combination of the "ifc" file extension and this project. You can also get a specific deserializer if you want to.
             SDeserializerPluginConfiguration deserializer = client.getServiceInterface().getSuggestedDeserializerForExtension("ifc", poid);
@@ -53,13 +48,20 @@ public class BimServerAccess implements Access {
             // Make sure you change this to a path to a local IFC file
             Path demoIfcFile = Paths.get(this.ifcPath);
 
-            client.bulkCheckin(poid, demoIfcFile, comment);
+            //client.bulkCheckin(poid, demoIfcFile, comment);
+            SLongActionState state = client.checkinSync(poid, "test", deserializer.getOid(), false, demoIfcFile);
+
+            if (state.getState() != SActionState.FINISHED) {
+                System.out.println(state.getState());
+            }
 
             return project;
 
         } catch (ServerException e) {
             e.printStackTrace();
         } catch (UserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -69,30 +71,72 @@ public class BimServerAccess implements Access {
     public InputStream getInputStream() {
         // Connect to server
         // Creating a factory in a try statement, this makes sure the factory will be closed after use
-        try (JsonBimServerClientFactory factory = new JsonBimServerClientFactory(this.address)) {
-            // Creating a client in a try statement, this makes sure the client will be closed after use
-            try (BimServerClient client = factory.create(new UsernamePasswordAuthenticationInfo(username, password))) {
-                // Do something with the client
-                SProject project = checkinFile(client);
-
-                SSerializerPluginConfiguration serializer = client.getServiceInterface().getSerializerByContentType("application/ifc");
-
-                long topicId = client.getServiceInterface().download(
-                        Collections.singleton(project.getLastConcreteRevisionId()),
-                        this.query,
-                        serializer.getOid(),
-                        true); // True for syncing
-                return client.getDownloadData(topicId);
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (Exception e1) {
-            e1.printStackTrace();
+        JsonBimServerClientFactory factory = null;
+        try {
+            factory = new JsonBimServerClientFactory(this.address);
+        } catch (BimServerClientException e) {
+            e.printStackTrace();
+        }
+        // Creating a client in a try statement, this makes sure the client will be closed after use
+        BimServerClient client = null;
+        try {
+            client = factory.create(new UsernamePasswordAuthenticationInfo(username, password));
+        } catch (ServiceException e) {
+            e.printStackTrace();
+        } catch (ChannelConnectionException e) {
+            e.printStackTrace();
+        }
+        // Do something with the client
+        SProject project = null;
+        try {
+            project = checkinFile(client);
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+        try {
+            project = client.getServiceInterface().getProjectByPoid(project.getOid());
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+        SSerializerPluginConfiguration serializer = null;
+        try {
+            serializer = client.getServiceInterface().getSerializerByContentType("application/ifc");
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (UserException e) {
+            e.printStackTrace();
         }
 
-        return null;
+        long topicId = 0; // True for syncing
+        try {
+            topicId = client.getServiceInterface().download(
+                    Collections.singleton(project.getLastRevisionId()),
+
+                    /*"{\n" +
+                            "  \"type\": {\n" +
+                            "    \"name\": \"IfcWall\",\n" +
+                            "    \"includeAllSubTypes\": true\n" +
+                            "  }\n" +
+                            "}",*/
+                    DefaultQueries.allAsString(),
+                    serializer.getOid(),
+                    false);
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+        InputStream result = null;
+        try {
+            result = client.getDownloadData(topicId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override

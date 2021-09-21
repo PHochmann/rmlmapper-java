@@ -54,6 +54,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>icm</id>
+            <url>https://maven.icm.edu.pl/artifactory/repo/</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
@@ -281,6 +285,17 @@
             <artifactId>bimserverclientlib</artifactId>
             <version>1.5.182</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.8</version>
+            <scope>system</scope>
+            <systemPath>/home/philipph/Uni/Masterarbeit/com.sun.tools-1.8.0_jdk8u275-b01_linux_x64.jar</systemPath>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>

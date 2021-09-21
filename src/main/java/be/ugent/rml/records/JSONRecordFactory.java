@@ -31,12 +31,14 @@ public class JSONRecordFactory extends IteratorFormat<Object> implements Referen
         try {
             List<String> pathList = JsonPath.using(conf).parse(document).read(escapedIterator);
 
-            for(String p :pathList) {
+            for(String p : pathList) {
                 records.add(new JSONRecord(document, p));
             }
         } catch (JsonPathException e) {
             logger.warn(e.getMessage() + " for iterator " + iterator, e);
         }
+
+        logger.info("LOL");
 
         return records;
     }

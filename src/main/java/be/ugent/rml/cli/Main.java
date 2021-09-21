@@ -195,6 +195,7 @@ public class Main {
                         mappingOptions.put(option.getLongOpt().replace("r2rml-", ""), getOptionValues(option, lineArgs, configFile)[0]);
                     }
                 }
+                logger.info("LOL");
 
                 // Read mapping file.
                 RDF4JStore rmlStore = new RDF4JStore();

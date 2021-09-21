@@ -183,7 +183,7 @@ public class AccessFactory {
                         };
                         access = new WoTAccess(target, contentType, headers);
                         break;
-                    case NAMESPACES.IFCRML + "Ifc":
+                    case NAMESPACES.IFCRML + "ifc":
                         return getBimServerAccess(rmlStore, source, logicalSource);
                     default:
                         throw new NotImplementedException();
@@ -198,18 +198,18 @@ public class AccessFactory {
 
     private BimServerAccess getBimServerAccess(QuadStore rmlStore, Term source, Term logicalSource)
     {
-        List<Term> urls         = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "url"), null));
-        List<Term> users        = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "username"), null));
-        List<Term> passwords    = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "password"), null));
-        List<Term> localIfcPath = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "path"), null));
-        List<Term> queries = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "query"), null));
+        List<Term> urls      = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "url"), null));
+        List<Term> users     = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "username"), null));
+        List<Term> passwords = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "password"), null));
+        List<Term> paths     = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "path"), null));
+        List<Term> queries   = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "query"), null));
 
-        if (urls.isEmpty() || users.isEmpty() || passwords.isEmpty() || localIfcPath.isEmpty())
+        if (urls.isEmpty() || users.isEmpty() || passwords.isEmpty() || paths.isEmpty() || queries.isEmpty())
         {
             throw new Error("The IFC source object " + source + " does not contain all relevant information.");
         }
 
-        return new BimServerAccess(urls.get(0).getValue(), users.get(0).getValue(), passwords.get(0).getValue(), localIfcPath.get(0).getValue(), queries.get(0).getValue());
+        return new BimServerAccess(urls.get(0).getValue(), users.get(0).getValue(), passwords.get(0).getValue(), paths.get(0).getValue(), queries.get(0).getValue());
     }
 
     /**

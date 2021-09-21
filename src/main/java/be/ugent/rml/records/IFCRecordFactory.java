@@ -7,12 +7,10 @@ import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.term.Literal;
 import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.csv.CSVParser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
@@ -24,19 +22,25 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
     public List<Record> getRecords(Access access, Term logicalSource, QuadStore rmlStore) throws IOException, SQLException, ClassNotFoundException {
         // Interpret result as stream of text
         try (InputStream queryResult = access.getInputStream()) {
-            List<String> doc =
-                    new BufferedReader(new InputStreamReader(queryResult,
-                            StandardCharsets.UTF_8)).lines().collect(Collectors.toList());
 
-            List<Record> result = new ArrayList<>();
-            for (String str : doc) {
-                result.add(new IFCRecord(str));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            IOUtils.copy(queryResult, baos);
+            System.out.println(baos.size() + " bytes downloaded");
+
+            String file_str = new String( baos.toByteArray(), StandardCharsets.UTF_8 );
+
+            List<Record> res = new ArrayList<>();
+
+            BufferedReader bufReader = new BufferedReader(new StringReader(file_str));
+
+            String line = null;
+            while( (line=bufReader.readLine()) != null )
+            {
+                if (line.startsWith("#")) res.add(new IFCRecord(line));
             }
 
-            return result;
+            return res;
         }
-
-
     }
 
 }
