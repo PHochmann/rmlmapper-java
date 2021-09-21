@@ -1,8 +1,8 @@
 package be.ugent.rml.cli;
 
 import be.ugent.rml.Executor;
+import be.ugent.rml.StrictMode;
 import be.ugent.rml.Utils;
-import be.ugent.rml.access.DatabaseType;
 import be.ugent.rml.conformer.MappingConformer;
 import be.ugent.rml.functions.FunctionLoader;
 import be.ugent.rml.functions.lib.IDLabFunctions;
@@ -11,21 +11,28 @@ import be.ugent.rml.records.RecordsFactory;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.store.RDF4JStore;
 import be.ugent.rml.store.SimpleQuadStore;
+import be.ugent.rml.target.Target;
+import be.ugent.rml.target.TargetFactory;
 import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
 import ch.qos.logback.classic.Level;
 import org.apache.commons.cli.*;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.eclipse.rdf4j.rio.RDFParseException;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static be.ugent.rml.StrictMode.*;
 
 public class Main {
 
@@ -50,6 +57,13 @@ public class Main {
                 .numberOfArgs(Option.UNLIMITED_VALUES)
                 .desc("one or more mapping file paths and/or strings (multiple values are concatenated). " +
                         "r2rml is converted to rml if needed using the r2rml arguments.")
+                .build();
+        Option privateSecurityDataOption = Option.builder("psd")
+                .longOpt("privatesecuritydata")
+                .hasArg()
+                .numberOfArgs(Option.UNLIMITED_VALUES)
+                .desc("one or more private security files containing all private security information such as " +
+                        "usernames, passwords, certificates, etc.")
                 .build();
         Option outputfileOption = Option.builder("o")
                 .longOpt("outputfile")
@@ -114,8 +128,18 @@ public class Main {
                 .desc("username of the database when using R2RML rules")
                 .hasArg()
                 .build();
+        Option strictModeOption = Option.builder()
+                .longOpt("strict")
+                .desc("Enable strict mode. In strict mode, the mapper will fail on invalid IRIs instead of skipping them.")
+                .build();
+        Option baseIriOption = Option.builder("b")
+                .longOpt("base-iri")
+                .desc("Base IRI used to expand relative IRIs in generated terms in the output.")
+                .hasArg()
+                .build();
 
         options.addOption(mappingdocOption);
+        options.addOption(privateSecurityDataOption);
         options.addOption(outputfileOption);
         options.addOption(functionfileOption);
         options.addOption(removeduplicatesOption);
@@ -129,6 +153,8 @@ public class Main {
         options.addOption(jdbcDSNOption);
         options.addOption(passwordOption);
         options.addOption(usernameOption);
+        options.addOption(strictModeOption);
+        options.addOption(baseIriOption);
 
         CommandLineParser parser = new DefaultParser();
         try {
@@ -178,6 +204,23 @@ public class Main {
                 catch (RDFParseException e) {
                     logger.error(fatal, "Unable to parse mapping rules as Turtle. Does the file exist and is it valid Turtle?", e);
                     System.exit(1);
+                }
+
+                // Private security data is optionally
+                if (lineArgs.hasOption("psd")) {
+                    // Read the private security data.
+                    String[] mOptionValuePrivateSecurityData = getOptionValues(privateSecurityDataOption, lineArgs, configFile);
+                    List<InputStream> lisPrivateSecurityData = Arrays.stream(mOptionValuePrivateSecurityData)
+                            .map(Utils::getInputStreamFromFileOrContentString)
+                            .collect(Collectors.toList());
+                    InputStream isPrivateSecurityData = new SequenceInputStream(Collections.enumeration(lisPrivateSecurityData));
+                    try {
+                        rmlStore.read(isPrivateSecurityData, null, RDFFormat.TURTLE);
+                    } catch (RDFParseException e) {
+                        logger.debug(e.getMessage());
+                        logger.error(fatal, "Unable to parse private security data as Turtle. Does the file exist and is it valid Turtle?");
+                        System.exit(1);
+                    }
                 }
 
                 // Convert mapping file to RML if needed.
@@ -265,7 +308,22 @@ public class Main {
                         .collect(Collectors.toList());
                 is = new SequenceInputStream(Collections.enumeration(lis));
 
-                executor = new Executor(rmlStore, factory, functionLoader, outputStore, Utils.getBaseDirectiveTurtle(is));
+                boolean strict = checkOptionPresence(strictModeOption, lineArgs, configFile);
+                StrictMode strictMode = strict ? STRICT : BEST_EFFORT;
+
+                // get the base IRI
+                String baseIRI = getPriorityOptionValue(baseIriOption, lineArgs, configFile);
+                if (baseIRI == null || baseIRI.isEmpty()) {
+                    // if no explicit base IRI is set
+                    if (strictMode.equals(STRICT)) {
+                        throw new Exception("When running in strict mode, a base IRI argument must be set.");
+                    } else {
+                        // Best-effort mode, use the @base directive as a fallback
+                        baseIRI = Utils.getBaseDirectiveTurtle(is);
+                    }
+                }
+
+                executor = new Executor(rmlStore, factory, functionLoader, outputStore, baseIRI, strictMode);
 
                 List<Term> triplesMaps = new ArrayList<>();
 
@@ -286,8 +344,9 @@ public class Main {
                 String startTimestamp = Instant.now().toString();
 
                 try {
-                    QuadStore result = executor.execute(triplesMaps, checkOptionPresence(removeduplicatesOption, lineArgs, configFile),
+                    HashMap<Term, QuadStore> targets = executor.executeV5(triplesMaps, checkOptionPresence(removeduplicatesOption, lineArgs, configFile),
                             metadataGenerator);
+                    QuadStore result = targets.get(new NamedNode("rmlmapper://default.store"));
 
                     // Get stop timestamp for post mapping metadata
                     String stopTimestamp = Instant.now().toString();
@@ -301,13 +360,9 @@ public class Main {
                     }
 
                     String outputFile = getPriorityOptionValue(outputfileOption, lineArgs, configFile);
-
-                    if (result.isEmpty()) {
-                        logger.info("No results!");
-                        // Write even if no results
-                    }
                     result.copyNameSpaces(rmlStore);
-                    writeOutput(result, outputFile, outputFormat);
+
+                    writeOutputTargets(targets, rmlStore, basePath, outputFile, outputFormat);
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 }
@@ -321,8 +376,60 @@ public class Main {
         }
     }
 
+    private static void writeOutputTargets(HashMap<Term, QuadStore> targets, QuadStore rmlStore, String basePath, String outputFileDefault, String outputFormatDefault) throws Exception {
+        boolean hasNoResults = true;
+
+        logger.debug("Writing to Targets: " + targets.keySet());
+        TargetFactory targetFactory = new TargetFactory(basePath);
+
+        // Go over each term and export to the Target if needed
+        for (Map.Entry<Term, QuadStore> termTargetMapping: targets.entrySet()) {
+            Term term = termTargetMapping.getKey();
+            QuadStore store = termTargetMapping.getValue();
+
+            if (store.size() > 0) {
+                hasNoResults = false;
+                logger.info("Target: " + term + " has " + store.size() + " results");
+            }
+
+            // Default target is exported separately for backwards compatibility reasons
+            if (term.getValue().equals("rmlmapper://default.store")) {
+                logger.debug("Exporting to default Target");
+                writeOutput(store, outputFileDefault, outputFormatDefault);
+            }
+            else {
+                logger.debug("Exporting to Target: " + term);
+                if (store.size() > 1) {
+                    logger.info(store.size() + " quads were generated for " + term + " Target");
+                } else {
+                    logger.info(store.size() + " quad was generated " + term + " Target");
+                }
+
+                Target target = targetFactory.getTarget(term, rmlStore);
+                String serializationFormat = target.getSerializationFormat();
+                OutputStream output = target.getOutputStream();
+
+                // Set character encoding
+                Writer out = new BufferedWriter(new OutputStreamWriter(output, Charset.defaultCharset()));
+
+                // Write store to target
+                store.write(out, serializationFormat);
+
+                // Close OS resources
+                out.close();
+                target.close();
+            }
+        }
+
+        if (hasNoResults) {
+            logger.info("No results!");
+        }
+    }
+
     private static boolean checkOptionPresence(Option option, CommandLine lineArgs, Properties properties) {
-        return lineArgs.hasOption(option.getOpt()) || (properties != null
+        return (option.getOpt() != null && lineArgs.hasOption(option.getOpt()))
+                || (option.getLongOpt() != null && lineArgs.hasOption(option.getLongOpt()))
+                || (properties != null
                 && properties.getProperty(option.getLongOpt()) != null
                 && !properties.getProperty(option.getLongOpt()).equals("false"));  // ex: 'help = false' in the config file shouldn't return the help text
     }
@@ -389,9 +496,9 @@ public class Main {
         File targetFile = null;
 
         if (store.size() > 1) {
-            logger.info(store.size() + " quads were generated");
+            logger.info(store.size() + " quads were generated for default Target");
         } else {
-            logger.info(store.size() + " quad was generated");
+            logger.info(store.size() + " quad was generated for default Target");
         }
 
         try {
@@ -409,10 +516,10 @@ public class Main {
 
                 doneMessage = "Writing to " + targetFile.getPath() + " is done.";
 
-                out = new BufferedWriter(new FileWriter(targetFile));
+                out = Files.newBufferedWriter(targetFile.toPath(), StandardCharsets.UTF_8);
 
             } else {
-                out = new BufferedWriter(new OutputStreamWriter(System.out));
+                out = new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
             }
 
             store.write(out, format);

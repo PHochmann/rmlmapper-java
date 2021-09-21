@@ -8,7 +8,6 @@ import java.util.Arrays;
 
 @RunWith(Parameterized.class)
 public class Mapper_CSVW_Test extends TestCore {
-
     @Parameterized.Parameter(0)
     public String testCaseName;
 

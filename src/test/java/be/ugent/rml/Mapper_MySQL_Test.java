@@ -11,25 +11,27 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static be.ugent.rml.MyFileUtils.getParentPath;
+import static be.ugent.rml.TestStrictMode.*;
 
 @RunWith(Parameterized.class)
 public class Mapper_MySQL_Test extends MySQLTestCore {
 
     private static String CONNECTIONSTRING;
-    private static DB mysqlDB;
 
     @BeforeClass
     public static void before() throws Exception {
         int portNumber = Utils.getFreePortNumber();
         CONNECTIONSTRING = getConnectionString(portNumber);
         mysqlDB = setUpMySQLDBInstance(portNumber);
+        mappingOptions = new HashMap<>();
     }
 
     @AfterClass
     public static void after() throws ManagedProcessException {
-        stopDBs(mysqlDB);
+        stopDBs();
     }
 
     @Parameterized.Parameter(0)
@@ -38,6 +40,9 @@ public class Mapper_MySQL_Test extends MySQLTestCore {
     @Parameterized.Parameter(1)
     public Class<? extends Exception> expectedException;
 
+    @Parameterized.Parameter(2)
+    public TestStrictMode testStrictMode;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -45,86 +50,101 @@ public class Mapper_MySQL_Test extends MySQLTestCore {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 // scenarios:
-                {"RMLTC0000", null},
-                {"RMLTC0001a", null},
-                {"RMLTC0001b", null},
-                {"RMLTC0002a", null},
-                {"RMLTC0002b", null},
-                {"RMLTC0002c", Error.class},
-                {"RMLTC0002d", null},
-                {"RMLTC0002e", Error.class},
-//                {"RMLTC0002f", null},
-                {"RMLTC0002g", Error.class},
-                {"RMLTC0002h", Error.class},
+                {"RMLTC0000", null, BOTH},
+                {"RMLTC0001a", null, BOTH},
+                {"RMLTC0001b", null, BOTH},
+                {"RMLTC0002a", null, BOTH},
+                {"RMLTC0002b", null, BOTH},
+                {"RMLTC0002c", Error.class, BOTH},
+                {"RMLTC0002d", null, BOTH},
+                {"RMLTC0002e", Error.class, BOTH},
+//                {"RMLTC0002f", null, TestMode.BOTH},
+                {"RMLTC0002g", Error.class, BOTH},
+                {"RMLTC0002h", Error.class, BOTH},
                 // TODO see issue #130
-                {"RMLTC0002i", Error.class},
-                {"RMLTC0002j", null},
+                {"RMLTC0002i", Error.class, BOTH},
+                {"RMLTC0002j", null, BOTH},
                 // TODO see issue #130
-                {"RMLTC0003a", Error.class},
-                {"RMLTC0003b", null},
-                {"RMLTC0003c", null},
-                {"RMLTC0004a", null},
-                {"RMLTC0004b", null},
-                {"RMLTC0005a", null},
-                {"RMLTC0005b", null},
-                {"RMLTC0006a", null},
-                {"RMLTC0007a", null},
-                {"RMLTC0007b", null},
-                {"RMLTC0007c", null},
-                {"RMLTC0007d", null},
-                {"RMLTC0007e", null},
-                {"RMLTC0007f", null},
-                {"RMLTC0007g", null},
-                {"RMLTC0007h", Error.class},
-                {"RMLTC0008a", null},
-                {"RMLTC0008b", null},
-                {"RMLTC0008c", null},
-                {"RMLTC0009a", null},
-                {"RMLTC0009b", null},
-                {"RMLTC0009c", null},
-                {"RMLTC0009d", null},
-                {"RMLTC0010a", null},
-                {"RMLTC0010b", null},
-                {"RMLTC0010c", null},
-//                {"RMLTC0011a", null},
-                {"RMLTC0011b", null},
-                {"RMLTC0012a", null},
-                {"RMLTC0012b", null},
-                {"RMLTC0012c", Error.class},
-                {"RMLTC0012d", Error.class},
-                {"RMLTC0012e", null},
-//                {"RMLTC0013a", null},
-                {"RMLTC0014d", null},
-//                {"RMLTC0015a", null},
-                {"RMLTC0015b", Error.class},
-                {"RMLTC0016a", null},
-                {"RMLTC0016b", null},
-                {"RMLTC0016c", null},
-                {"RMLTC0016d", null},
-//                {"RMLTC0016e", null},
-//                {"RMLTC0018a", null},
-                {"RMLTC0019a", null},
-                {"RMLTC0019b", null},
-                {"RMLTC0020a", null},
-                {"RMLTC0020b", null},
-                {"RMLTC1019", null},
-                {"RMLTC1020", null},
-
-                {"RMLTC1022", null},
+                {"RMLTC0003a", Error.class, BOTH},
+                {"RMLTC0003b", null, BOTH},
+                {"RMLTC0003c", null, BOTH},
+                {"RMLTC0004a", null, BOTH},
+                {"RMLTC0004b", Error.class, BOTH},
+                {"RMLTC0005a", null, BOTH},
+                {"RMLTC0005b", null, BOTH},
+                {"RMLTC0006a", null, BOTH},
+                {"RMLTC0007a", null, BOTH},
+                {"RMLTC0007b", null, BOTH},
+                {"RMLTC0007c", null, BOTH},
+                {"RMLTC0007d", null, BOTH},
+                {"RMLTC0007e", null, BOTH},
+                {"RMLTC0007f", null, BOTH},
+                {"RMLTC0007g", null, BOTH},
+                {"RMLTC0007h", Error.class, BOTH},
+                {"RMLTC0008a", null, BOTH},
+                {"RMLTC0008b", null, BOTH},
+                {"RMLTC0008c", null, BOTH},
+                {"RMLTC0009a", null, BOTH},
+                {"RMLTC0009b", null, BOTH},
+                {"RMLTC0009c", null, BOTH},
+                {"RMLTC0009d", null, BOTH},
+                {"RMLTC0010a", null, BOTH},
+                {"RMLTC0010b", null, BOTH},
+                {"RMLTC0010c", null, BOTH},
+//                {"RMLTC0011a", null, BOTH},
+                {"RMLTC0011b", null, BOTH},
+                {"RMLTC0012a", null, BOTH},
+                {"RMLTC0012b", null, BOTH},
+                {"RMLTC0012c", Error.class, BOTH},
+                {"RMLTC0012d", Error.class, BOTH},
+                {"RMLTC0012e", null, BOTH},
+                {"RMLTC0013a", null, BOTH},
+                {"RMLTC0014d", null, BOTH},
+//                {"RMLTC0015a", null, BOTH},
+                {"RMLTC0015b", Error.class, BOTH},
+                {"RMLTC0016a", null, BOTH},
+                {"RMLTC0016b", null, BOTH},
+                {"RMLTC0016c", null, BOTH},
+                {"RMLTC0016d", null, BOTH},
+                {"RMLTC0016e", null, BOTH}, // Issue 184, resolved
+//                {"RMLTC0018a", null, BOTH},
+                {"RMLTC0019a", null, BOTH},
+                /*
+                    Expected output for RMLTC0019b is written for best-effort operation.
+                    The case will fail in strict mode.
+                 */
+                {"RMLTC0019b", null, BEST_EFFORT_ONLY},
+                {"RMLTC0020a", null, BOTH},
+                /*
+                    Expected output for RMLTC0020b is written for best-effort operation.
+                    The case will fail in strict mode.
+                 */
+                {"RMLTC0020b", null, BEST_EFFORT_ONLY},
+                {"RMLTC1019", null, BOTH},
+                {"RMLTC1020", null, BOTH},
+                {"RMLTC1022", null, BOTH},
         });
     }
 
     @Test
     public void doMapping() throws Exception {
-        mappingTest(testCaseName, expectedException);
+        if (testStrictMode.equals(BOTH) || testStrictMode.equals(BEST_EFFORT_ONLY)) {
+            // test the best-effort mode of the mapper
+            mappingTest(testCaseName, expectedException, StrictMode.BEST_EFFORT);
+        }
+        if (testStrictMode.equals(BOTH) || testStrictMode.equals(STRICT_ONLY)) {
+            // test the mapper in strict mode
+            mappingTest(testCaseName, expectedException, StrictMode.STRICT);
+        }
     }
 
-    private void mappingTest(String testCaseName, Class expectedException) throws Exception {
+    private void mappingTest(String testCaseName, Class expectedException, StrictMode strictMode) throws Exception {
         String resourcePath = "test-cases/" + testCaseName + "-MySQL/resource.sql";
         String mappingPath = "./test-cases/" + testCaseName + "-MySQL/mapping.ttl";
         String outputPath = "test-cases/" + testCaseName + "-MySQL/output.nq";
 
-        String tempMappingPath = replaceDSNInMappingFile(mappingPath, CONNECTIONSTRING);
+        // Create a temporary copy of the mapping file and replace source details
+        String tempMappingPath = CreateTempMappingFileAndReplaceDSN(mappingPath, CONNECTIONSTRING);
 
         // Get SQL resource
         mysqlDB.source(resourcePath);
@@ -133,9 +153,9 @@ public class Mapper_MySQL_Test extends MySQLTestCore {
         String parentPath = getParentPath(getClass(), outputPath);
 
         if (expectedException == null) {
-            doMapping(tempMappingPath, outputPath, parentPath);
+            doMapping(tempMappingPath, outputPath, parentPath, strictMode);
         } else {
-            doMappingExpectError(tempMappingPath);
+            doMappingExpectError(tempMappingPath, strictMode);
         }
 
         deleteTempMappingFile(tempMappingPath);

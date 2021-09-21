@@ -53,7 +53,7 @@ public class Mapper_OracleDB_Test extends DBTestCore {
 //                {"RMLTC0003b", null},
 //                {"RMLTC0003c", null},
 //                {"RMLTC0004a", null},
-//                {"RMLTC0004b", null},
+//                {"RMLTC0004b", Error.class},
 //                {"RMLTC0005a", null},
 //                {"RMLTC0005b", null},
 //                {"RMLTC0006a", null},
@@ -109,7 +109,8 @@ public class Mapper_OracleDB_Test extends DBTestCore {
         String mappingPath = "./test-cases/" + testCaseName + "-OracleDB/mapping.ttl";
         String outputPath = "test-cases/" + testCaseName + "-OracleDB/output.nq";
 
-        String tempMappingPath = replaceDSNInMappingFile(mappingPath, CONNECTIONSTRING);
+        // Create a temporary copy of the mapping file and replace source details
+        String tempMappingPath = CreateTempMappingFileAndReplaceDSN(mappingPath, CONNECTIONSTRING);
 
         File resourceFile = Utils.getFile(resourcePath, null);
         InputStream resourceStream = new FileInputStream(resourceFile);

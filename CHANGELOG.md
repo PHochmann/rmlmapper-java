@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [4.12.0] - 2021-08-02
+
+### Fixed
+- R2RML: floating point differences between RDBs (see [issue 203](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/203))
+- R2RML: do not percent-encode binary data (see [issue 184](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/184))
+- R2RML: handle binary data differences between RDBs (see [issue 200](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/200))
+- Create an empty output file for empty JSON arrays as well (see [issue 98](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/98))
+- Always output UTF-8 encoded RDF (see [issue 119](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/119))
+- Refactor RDB records for better NULL and empty string handling (see [issue 131](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/131))
+- Align R2RML test cases with [kg-construct/r2rml-test-cases](https://github.com/kg-construct/r2rml-test-cases-support/pull/16) (see [issue 211](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/211))
+
+### Added
+- FunctionLoader: throw error on missing function parameters (see [issue 125](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/125))
+- HTMLRecordFactory: add CSS3 selector support (see [issue 52](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/52))
+- CSVRecordFactory: add spreadsheet support (see [issue 42](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/42))
+- IDLabFunctions: add slugify to default idlab-fn functions (see [issue 209](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/209))
+- RDBAccess: add XML support for PostgreSQL RDB (see [issue 51](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/51))
+- AccessFactory: add WoT BearerSecurity scheme (see [issue 195](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/195))
+
+## [4.11.0] - 2021-07-05
+
+### Added
+- R2RML test cases (see [issue 192](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/192))
+- DCAT support
+
+### Fixed
+- R2RML support: handle booleans correctly (see [issue 187](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/187))
+- W3C Formats Namespace: use http instead of https
+
+## [4.10.1] - 2021-06-15
+
+### Fixed
+- README Markdown rendering and links
+- Follow HTTP redirects for Web APIs (see [issue 196](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/196))
+
+## [4.10.0] - 2021-05-05
+
+### Added
+- Added support for named graphs in RDFJStore.
+- Support for Logical Target and exporting to a local file with various 
+serializations and compression, or a SPARQL endpoint using 
+SPARQL UPDATE queries.
+- W3C Web of Things Web API access support to retrieve data from Web API 
+with token authentication.
+
+### Changed
+- Use RDF4JStore by default (see [issue 108](https://github.com/RMLio/rmlmapper-java/issues/108)).
+- Public API of the Executor has been updated and is available under `<method>V5`,
+the old API is still available but deprecated. In a future release, the old API
+will be removed and the new one will drop the `V5` suffix.
+
+### Fixed
+- Add remark about duplicate removal and serialization format performance (see [issue 108](https://github.com/RMLio/rmlmapper-java/issues/108)).
+- Treat empty values in CSV columns as NULL values in RDBs (see [issue 188](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/188)).
+- Fixed reloading the function every iteration, hopefully this gives a speed boost
+- Fix R2RML conversion of multiple Triples Maps (see [issue 186](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/186)).
+- Fix datatype retrieval when RDB colum names are quoted (see [issue 185](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/185)).
+
+## [4.9.4] - 2021-03-19
+
+### Changed
+- Link to our Docker images on Dockerhub in README (see [issue 109](https://github.com/RMLio/rmlmapper-java/issues/109))
+
+### Fixed
+- Support @ in JSONPath (see [issue 178](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/178))
+- JSONRecord: ignore 'null' values in JSONArray as well (see [issue 103](https://github.com/RMLio/rmlmapper-java/issues/103))
+
 ## [4.9.3] - 2021-03-05
 
 ### Fixed
@@ -26,6 +93,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - support SQL queries that have unnamed columns
+
+### Added
+- Add Logical Target support
+- Add Web of Things support
+- Add compression support
 
 ## [4.9.1] - 2020-12-04
 
@@ -322,6 +394,12 @@ and [169](https://gitlab.ilabt.imec.be/rml/proc/rmlmapper-java/-/issues/169))
 - support for accessing remote files (via HTTP GET)
 - basic support for functions
 
+[4.12.0]: https://github.com/RMLio/rmlmapper-java/compare/v4.11.0...v4.12.0
+[4.11.0]: https://github.com/RMLio/rmlmapper-java/compare/v4.10.1...v4.11.0
+[4.10.1]: https://github.com/RMLio/rmlmapper-java/compare/v4.10.0...v4.10.1
+[4.10.0]: https://github.com/RMLio/rmlmapper-java/compare/v4.9.3...v4.10.0
+[4.9.4]: https://github.com/RMLio/rmlmapper-java/compare/v4.9.3...v4.9.4
+[4.9.3]: https://github.com/RMLio/rmlmapper-java/compare/v4.9.2...v4.9.3
 [4.9.2]: https://github.com/RMLio/rmlmapper-java/compare/v4.9.1...v4.9.2
 [4.9.1]: https://github.com/RMLio/rmlmapper-java/compare/v4.9.0...v4.9.1
 [4.9.0]: https://github.com/RMLio/rmlmapper-java/compare/v4.8.2...v4.9.0
