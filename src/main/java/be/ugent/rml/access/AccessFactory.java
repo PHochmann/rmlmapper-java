@@ -104,6 +104,11 @@ public class AccessFactory {
                         }
 
                         break;
+
+                    case NAMESPACES.IFCRML + "Ifc":
+                        return getBimServerAccess(rmlStore, source, logicalSource);
+
+
                     default:
                         throw new NotImplementedException();
                 }
@@ -113,6 +118,22 @@ public class AccessFactory {
         } else {
             throw new Error("The Logical Source does not have a source.");
         }
+    }
+
+    private BimServerAccess getBimServerAccess(QuadStore rmlStore, Term source, Term logicalSource)
+    {
+        List<Term> urls         = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "url"), null));
+        List<Term> users        = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "username"), null));
+        List<Term> passwords    = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "password"), null));
+        List<Term> localIfcPath = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "path"), null));
+        List<Term> queries = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "query"), null));
+
+        if (urls.isEmpty() || users.isEmpty() || passwords.isEmpty() || localIfcPath.isEmpty())
+        {
+            throw new Error("The IFC source object " + source + " does not contain all relevant information.");
+        }
+
+        return new BimServerAccess(urls.get(0).getValue(), users.get(0).getValue(), passwords.get(0).getValue(), localIfcPath.get(0).getValue(), queries.get(0).getValue());
     }
 
     /**

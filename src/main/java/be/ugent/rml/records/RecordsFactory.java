@@ -33,6 +33,7 @@ public class RecordsFactory {
         referenceFormulationRecordFactoryMap.put(NAMESPACES.QL + "XPath", new XMLRecordFactory());
         referenceFormulationRecordFactoryMap.put(NAMESPACES.QL + "JSONPath", new JSONRecordFactory());
         referenceFormulationRecordFactoryMap.put(NAMESPACES.QL + "CSV", new CSVRecordFactory());
+        referenceFormulationRecordFactoryMap.put(NAMESPACES.IFCRML + "IFC", new IFCRecordFactory());
     }
 
     /**
