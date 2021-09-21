@@ -1,15 +1,24 @@
 package be.ugent.rml.access;
 
+import be.ugent.rml.NAMESPACES;
+import be.ugent.rml.records.XMLRecord;
+import com.opencsv.CSVReader;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.nio.Buffer;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static be.ugent.rml.Utils.getHashOfString;
 
@@ -26,6 +35,17 @@ public class RDBAccess implements Access {
     private String contentType;
     private Map<String, String> datatypes = new HashMap<>();
     private String oracleJarPath;
+
+    // Datatype definitions
+    private final static String DOUBLE = "http://www.w3.org/2001/XMLSchema#double";
+    private final static String VARBINARY = "http://www.w3.org/2001/XMLSchema#hexBinary";
+    private final static String DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
+    private final static String INTEGER = "http://www.w3.org/2001/XMLSchema#integer";
+    private final static String BOOLEAN = "http://www.w3.org/2001/XMLSchema#boolean";
+    private final static String DATE = "http://www.w3.org/2001/XMLSchema#date";
+    private final static String TIME = "http://www.w3.org/2001/XMLSchema#time";
+    private final static String DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
+
 
     /**
      * This constructor takes as arguments the dsn, database, username, password, query, and content type.
@@ -101,8 +121,14 @@ public class RDBAccess implements Access {
             statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(query);
 
-            // Turn the Results Set into a CSV stream.
-            inputStream = getCSVInputStream(rs);
+            switch (contentType) {
+                case NAMESPACES.QL + "XPath" :
+                    inputStream = getXMLInputStream(rs);
+                    break;
+                default:
+                    inputStream = getCSVInputStream(rs);
+            }
+
 
             // Clean-up environment
             rs.close();
@@ -159,7 +185,10 @@ public class RDBAccess implements Access {
         StringWriter writer = new StringWriter();
 
         try {
-            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(getCSVHeader(rsmd, columnCount)));
+            // Differentiate null and ""
+            CSVFormat format = CSVFormat.DEFAULT.withHeader(getCSVHeader(rsmd, columnCount))
+                    .withNullString("@@@@NULL@@@@");
+            CSVPrinter printer = new CSVPrinter(writer, format);
             printer.printRecords();
 
             // Extract data from result set
@@ -169,17 +198,23 @@ public class RDBAccess implements Access {
                 // Iterate over column names
                 for (int i = 1; i <= columnCount; i++) {
                     String columnName = rsmd.getColumnLabel(i);
+                    String dataType = getColumnDataType(rsmd.getColumnTypeName(i));
 
+                    // Register datatype during first encounter
                     if (!filledInDataTypes) {
-                        String dataType = getColumnDataType(rsmd.getColumnTypeName(i));
-
                         if (dataType != null) {
                             datatypes.put(columnName, dataType);
                         }
                     }
 
-                    // Add value to CSV row.
-                    csvRow[i - 1] = rs.getString(columnName);
+                    // Normalize value and add value to CSV row.
+                    if (VARBINARY.equals(dataType)) {
+                        byte[] data = rs.getBytes(columnName);
+                        csvRow[i - 1] = bytesToHexString(data);
+                    } else {
+                        String data = rs.getString(columnName);
+                        csvRow[i - 1] = normalizeData(data, dataType);
+                    }
                 }
 
                 // Add CSV row to CSVPrinter.
@@ -195,6 +230,50 @@ public class RDBAccess implements Access {
         return new ByteArrayInputStream(writer.toString().getBytes());
     }
 
+    private InputStream getXMLInputStream(ResultSet rs) throws SQLException {
+        // Get number of requested columns
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnCount = rsmd.getColumnCount();
+
+        StringWriter writer = new StringWriter();
+
+        // Create document
+        DocumentBuilder builder;
+        try {
+            builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = builder.newDocument();
+
+            Element rootElement = doc.createElement("Results");
+            doc.appendChild(rootElement);
+            // Extract data from result set
+            while (rs.next()) {
+                Element row = doc.createElement("row");
+                rootElement.appendChild(row);
+
+                // Iterate over column names
+                for (int i = 1; i <= columnCount; i++) {
+                    Element el = doc.createElement(rsmd.getColumnName(i));
+                    el.appendChild(doc.createTextNode(rs.getObject(i).toString()));
+                    row.appendChild(el);
+                }
+            }
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+
+            transformer.transform(new DOMSource(doc), new StreamResult(writer));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Get InputStream from StringWriter.
+        return new ByteArrayInputStream(writer.toString().getBytes());
+
+    }
+
+
     /**
      * This method returns the corresponding datatype for a SQL datatype.
      *
@@ -208,35 +287,35 @@ public class RDBAccess implements Access {
             case "BINARY VARYING":
             case "BINARY LARGE OBJECT":
             case "VARBINARY":
-                return "http://www.w3.org/2001/XMLSchema#hexBinary";
+                return VARBINARY;
             case "NUMERIC":
             case "DECIMAL":
-                return "http://www.w3.org/2001/XMLSchema#decimal";
+                return DECIMAL;
             case "SMALLINT":
             case "INT":
             case "INT4":
             case "INT8":
             case "INTEGER":
             case "BIGINT":
-                return "http://www.w3.org/2001/XMLSchema#integer";
+                return INTEGER;
             case "FLOAT":
             case "FLOAT4":
             case "FLOAT8":
             case "REAL":
             case "DOUBLE":
             case "DOUBLE PRECISION":
-                return "http://www.w3.org/2001/XMLSchema#double";
+                return DOUBLE;
             case "BIT":
             case "BOOL":
             case "BOOLEAN":
-                return "http://www.w3.org/2001/XMLSchema#boolean";
+                return BOOLEAN;
             case "DATE":
-                return "http://www.w3.org/2001/XMLSchema#date";
+                return DATE;
             case "TIME":
-                return "http://www.w3.org/2001/XMLSchema#time";
+                return TIME;
             case "TIMESTAMP":
             case "DATETIME":
-                return "http://www.w3.org/2001/XMLSchema#dateTime";
+                return DATETIME;
         }
         return null;
     }
@@ -263,6 +342,34 @@ public class RDBAccess implements Access {
         }
 
         return headers;
+    }
+
+    /**
+     * Convert a sequence of bytes to a string representation using uppercase hex symbols
+     * @param bytes the bytes to convert
+     * @return a string containing the hexadecimal representation of the byte array
+     */
+    private static String bytesToHexString(byte[] bytes) {
+        StringBuilder builder = new StringBuilder();
+        for (byte b : bytes) {
+            // format: 0 flag for zero-padding, 2 character width, uppercase hexadecimal symbols
+            builder.append(String.format("%02X", b));
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Normalize the string representation of a data value given by the RDB.
+     * @param data the string representation retrieved from the RDB of the data to be normalized.
+     * @param dataType the intended datatype of the data parameter.
+     * @return Normalized string representation of the data parameter, given the datatype.
+     */
+    private static String normalizeData(String data, String dataType) {
+        if (DOUBLE.equals(dataType)) {
+            // remove trailing decimal points (Quirk from MySQL, see issue 203)
+            return data.replace(".0", "");
+        }
+        return data;
     }
 
     @Override

@@ -30,10 +30,12 @@ public class RecordsFactory {
         recordCache = new HashMap<>();
 
         referenceFormulationRecordFactoryMap = new HashMap<>();
-        referenceFormulationRecordFactoryMap.put(NAMESPACES.QL + "XPath", new XMLRecordFactory());
-        referenceFormulationRecordFactoryMap.put(NAMESPACES.QL + "JSONPath", new JSONRecordFactory());
-        referenceFormulationRecordFactoryMap.put(NAMESPACES.QL + "CSV", new CSVRecordFactory());
-        referenceFormulationRecordFactoryMap.put(NAMESPACES.IFCRML + "IFC", new IFCRecordFactory());
+        referenceFormulationRecordFactoryMap.put(ReferenceFormulation.XPath, new XMLRecordFactory());
+        referenceFormulationRecordFactoryMap.put(ReferenceFormulation.JSONPath, new JSONRecordFactory());
+        referenceFormulationRecordFactoryMap.put(ReferenceFormulation.CSV, new CSVRecordFactory());
+        referenceFormulationRecordFactoryMap.put(ReferenceFormulation.RDB, new CSVRecordFactory());
+        referenceFormulationRecordFactoryMap.put(ReferenceFormulation.CSS3, new HTMLRecordFactory());
+        referenceFormulationRecordFactoryMap.put(ReferenceFormulation.IFC, new IFCRecordFactory());
     }
 
     /**
@@ -43,7 +45,7 @@ public class RecordsFactory {
      * @return a list of records.
      * @throws IOException
      */
-    public List<Record> createRecords(Term triplesMap, QuadStore rmlStore) throws IOException, SQLException, ClassNotFoundException {
+    public List<Record> createRecords(Term triplesMap, QuadStore rmlStore) throws Exception {
         // Get Logical Sources.
         List<Term> logicalSources = Utils.getObjectsFromQuads(rmlStore.getQuads(triplesMap, new NamedNode(NAMESPACES.RML + "logicalSource"), null));
 
@@ -60,7 +62,7 @@ public class RecordsFactory {
             // If no rml:referenceFormulation is given, but a table is given --> CSV
             if (referenceFormulations.isEmpty() && !tables.isEmpty()) {
                 referenceFormulations = new ArrayList<>();
-                referenceFormulations.add(0, new NamedNode(NAMESPACES.QL + "CSV"));
+                referenceFormulations.add(0, new NamedNode(ReferenceFormulation.RDB));
             }
 
             if (referenceFormulations.isEmpty()) {
@@ -122,7 +124,7 @@ public class RecordsFactory {
      * @return a list of records.
      * @throws IOException
      */
-    private List<Record> getRecords(Access access, Term logicalSource, String referenceFormulation, QuadStore rmlStore) throws IOException, SQLException, ClassNotFoundException {
+    private List<Record> getRecords(Access access, Term logicalSource, String referenceFormulation, QuadStore rmlStore) throws Exception {
         String logicalSourceHash = hashLogicalSource(logicalSource, rmlStore);
 
         // Try to get the records from the cache.
@@ -140,7 +142,7 @@ public class RecordsFactory {
                 putRecordsIntoCache(access, referenceFormulation, logicalSourceHash, records);
 
                 return records;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw e;
             }
         }

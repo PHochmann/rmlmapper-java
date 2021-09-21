@@ -58,7 +58,7 @@ public class Mapper_JSON_Test extends TestCore {
 
     @Test
     public void evaluate_0004b_JSON() {
-        doMapping("./test-cases/RMLTC0004b-JSON/mapping.ttl", "./test-cases/RMLTC0004b-JSON/output.nq");
+        doMappingExpectError("./test-cases/RMLTC0004b-JSON/mapping.ttl");
     }
 
     @Test
@@ -236,7 +236,32 @@ public class Mapper_JSON_Test extends TestCore {
     }
 
     @Test
+    public void evaluate_1017_JSON() {
+        doMapping("./test-cases/RMLTC1017-JSON/mapping.ttl", "./test-cases/RMLTC1017-JSON/output.nq");
+    }
+
+    @Test
+    public void evaluate_1018_JSON() {
+        doMapping("./test-cases/RMLTC1018-JSON/mapping.ttl", "./test-cases/RMLTC1018-JSON/output.nq");
+    }
+
+    @Test
+    public void evaluate_1019_JSON() {
+        doMapping("./test-cases/RMLTC1019-JSON/mapping.ttl", "./test-cases/RMLTC1019-JSON/output.nq");
+    }
+
+    @Test
     public void evaluate_1021_JSON() {
         doMapping("./test-cases/RMLTC1021-JSON/mapping.ttl", "./test-cases/RMLTC1021-JSON/output.nq");
+    }
+
+    @Test
+    public void evaluate_1023_JSON() {
+        doMapping("./test-cases/RMLTC1023-JSON/mapping.ttl", "./test-cases/RMLTC1023-JSON/output.nq");
+    }
+
+    @Test
+    public void evaluate_1024_JSON() {
+        doMapping("./test-cases/RMLTC1024-JSON/mapping.ttl", "./test-cases/RMLTC1024-JSON/output.nq");
     }
 }
