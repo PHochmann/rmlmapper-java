@@ -198,6 +198,9 @@ public class AccessFactory {
 
     private BimServerAccess getBimServerAccess(QuadStore rmlStore, Term source, Term logicalSource)
     {
+        /*
+        TODO: MOVE SOME ATTRIBUTES FROM LOGICALSOURCE TO SOURCE
+         */
         List<Term> urls      = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "url"), null));
         List<Term> users     = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "username"), null));
         List<Term> passwords = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "password"), null));
