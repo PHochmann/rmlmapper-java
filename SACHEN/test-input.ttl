@@ -11,22 +11,24 @@
 <#VenueMapping> a rr:TriplesMap;
   rml:logicalSource [
     rml:source [
-      rdf:type ifcrml:ifc
+      rdf:type ifcrml:ifc;
+      ifcrml:serverLocation "http://localhost:8082";
+      ifcrml:password "123456";
+      ifcrml:username "admin@admin.com";
+      ifcrml:path "SACHEN/test-small.ifc";
+      ifcrml:format "ifc2x3tc1"
     ];
-    rml:referenceFormulation ifcrml:BIMSERVER-JSON-QL;
-    ifcrml:url "http://localhost:8082";
+
+
+    rml:referenceFormulation ifcrml:BimServerQL;
 
     ifcrml:query """{
       "type": {
         "name": "IfcProduct",
         "includeAllSubTypes": "true"
       }
-    }""";
-    
-    ifcrml:password "123456";
-    ifcrml:username "admin@admin.com";
-    ifcrml:path "SACHEN/test-small.ifc";
-    ifcrml:format "ifc2x3tc1"
+    }"""
+
   ];
 
   rr:subjectMap [

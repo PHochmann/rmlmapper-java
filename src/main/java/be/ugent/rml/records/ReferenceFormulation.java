@@ -8,5 +8,5 @@ public class ReferenceFormulation {
     public static String RDB = NAMESPACES.QL + "RDB";
     public static String JSONPath = NAMESPACES.QL + "JSONPath";
     public static String CSS3 = NAMESPACES.QL + "CSS3";
-    public static String IFC = NAMESPACES.IFCRML + "BIMSERVER-JSON-QL";
+    public static String IFC = NAMESPACES.IFCRML + "BimServerQL";
 }
