@@ -23,22 +23,26 @@ public class BimServerAccess implements Access {
     private String password;
     private String ifcPath;
     private String query;
+    private String format;
+    private BimServerClient client = null;
 
-    public BimServerAccess(String address, String username, String password, String ifcPath, String query) {
+    public BimServerAccess(String address, String username, String password, String ifcPath, String query, String format) {
         this.address = address;
         this.username = username;
         this.password = password;
         this.ifcPath = ifcPath;
         this.query = query;
+        this.format = format;
     }
 
-    /* Returns new project */
-    private SProject checkinFile(BimServerClient client) throws PublicInterfaceNotFoundException, ServerException, UserException {
+    public String getFormat() { return this.format; }
+
+    public static SProject checkinFile(String path, String format, BimServerClient client) throws PublicInterfaceNotFoundException, ServerException, UserException {
         try {
             String randomName = "Random " + new Random().nextLong();
 
             // Create a new project with a random name
-            SProject project = client.getServiceInterface().addProject(randomName, "ifc2x3tc1");
+            SProject project = client.getServiceInterface().addProject(randomName, format);
 
             long poid = project.getOid();
 
@@ -46,7 +50,7 @@ public class BimServerAccess implements Access {
             SDeserializerPluginConfiguration deserializer = client.getServiceInterface().getSuggestedDeserializerForExtension("ifc", poid);
 
             // Make sure you change this to a path to a local IFC file
-            Path demoIfcFile = Paths.get(this.ifcPath);
+            Path demoIfcFile = Paths.get(path);
 
             //client.bulkCheckin(poid, demoIfcFile, comment);
             SLongActionState state = client.checkinSync(poid, "test", deserializer.getOid(), false, demoIfcFile);
@@ -68,6 +72,8 @@ public class BimServerAccess implements Access {
         return null;
     }
 
+    public BimServerClient getClient() { return client; }
+
     public InputStream getInputStream() {
         // Connect to server
         // Creating a factory in a try statement, this makes sure the factory will be closed after use
@@ -78,7 +84,6 @@ public class BimServerAccess implements Access {
             e.printStackTrace();
         }
         // Creating a client in a try statement, this makes sure the client will be closed after use
-        BimServerClient client = null;
         try {
             client = factory.create(new UsernamePasswordAuthenticationInfo(username, password));
         } catch (ServiceException e) {
@@ -89,12 +94,13 @@ public class BimServerAccess implements Access {
         // Do something with the client
         SProject project = null;
         try {
-            project = checkinFile(client);
+            project = checkinFile(this.ifcPath, this.format, client);
         } catch (ServerException e) {
             e.printStackTrace();
         } catch (UserException e) {
             e.printStackTrace();
         }
+
         try {
             project = client.getServiceInterface().getProjectByPoid(project.getOid());
         } catch (ServerException e) {
@@ -102,6 +108,8 @@ public class BimServerAccess implements Access {
         } catch (UserException e) {
             e.printStackTrace();
         }
+
+
         SSerializerPluginConfiguration serializer = null;
         try {
             serializer = client.getServiceInterface().getSerializerByContentType("application/ifc");
@@ -115,14 +123,7 @@ public class BimServerAccess implements Access {
         try {
             topicId = client.getServiceInterface().download(
                     Collections.singleton(project.getLastRevisionId()),
-
-                    /*"{\n" +
-                            "  \"type\": {\n" +
-                            "    \"name\": \"IfcWall\",\n" +
-                            "    \"includeAllSubTypes\": true\n" +
-                            "  }\n" +
-                            "}",*/
-                    DefaultQueries.allAsString(),
+                    this.query,
                     serializer.getOid(),
                     false);
         } catch (ServerException e) {

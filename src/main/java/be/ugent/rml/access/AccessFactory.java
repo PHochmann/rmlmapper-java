@@ -206,13 +206,14 @@ public class AccessFactory {
         List<Term> passwords = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "password"), null));
         List<Term> paths     = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "path"), null));
         List<Term> queries   = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "query"), null));
+        List<Term> formats   = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "format"), null));
 
-        if (urls.isEmpty() || users.isEmpty() || passwords.isEmpty() || paths.isEmpty() || queries.isEmpty())
+        if (urls.isEmpty() || users.isEmpty() || passwords.isEmpty() || paths.isEmpty() || queries.isEmpty() || formats.isEmpty())
         {
             throw new Error("The IFC source object " + source + " does not contain all relevant information.");
         }
 
-        return new BimServerAccess(urls.get(0).getValue(), users.get(0).getValue(), passwords.get(0).getValue(), paths.get(0).getValue(), queries.get(0).getValue());
+        return new BimServerAccess(urls.get(0).getValue(), users.get(0).getValue(), passwords.get(0).getValue(), paths.get(0).getValue(), queries.get(0).getValue(), formats.get(0).getValue());
     }
 
     /**

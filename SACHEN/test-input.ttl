@@ -16,40 +16,20 @@
     rml:referenceFormulation ifcrml:BIMSERVER-JSON-QL;
     ifcrml:url "http://localhost:8082";
 
-    ifcrml:query "{ \
-      \"type\": { \
-        \"name\": \"IfcProduct\", \
-        \"includeAllSubTypes\": \"true\" \
-      } \
-    }";
-
+    ifcrml:query """{
+      "type": {
+        "name": "IfcProduct",
+        "includeAllSubTypes": "true"
+      }
+    }""";
+    
     ifcrml:password "123456";
     ifcrml:username "admin@admin.com";
-    ifcrml:path "SACHEN/test-input.ifc"
+    ifcrml:path "SACHEN/test-small.ifc";
+    ifcrml:format "ifc2x3tc1"
   ];
 
   rr:subjectMap [
-    rr:template "http://loc.example.com/city/{test}";
+    rr:template "http://loc.example.com/city/{GlobalId}";
     rr:class schema:City
-  ];
-
-  rr:predicateObjectMap [
-    rr:predicate wgs84_pos:lat;
-    rr:objectMap [
-      rml:reference "venue.latitude"
-    ]
-  ];
-
-  rr:predicateObjectMap [
-    rr:predicate wgs84_pos:long;
-    rr:objectMap [
-      rml:reference "venue.longitude"
-    ]
-  ];
-
-  rr:predicateObjectMap [
-    rr:predicate gn:countryCode;
-    rr:objectMap [
-      rml:reference "location.country"
-    ]
   ].
