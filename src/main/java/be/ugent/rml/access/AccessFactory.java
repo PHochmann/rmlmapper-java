@@ -207,7 +207,7 @@ public class AccessFactory {
         List<Term> paths     = Utils.getObjectsFromQuads(rmlStore.getQuads(source, new NamedNode(NAMESPACES.IFCRML + "path"), null));
         List<Term> formats   = Utils.getObjectsFromQuads(rmlStore.getQuads(source, new NamedNode(NAMESPACES.IFCRML + "format"), null));
 
-        List<Term> queries   = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "query"), null));
+        List<Term> queries   = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "iterator"), null));
 
         if (serverLocations.isEmpty() || users.isEmpty() || passwords.isEmpty() || paths.isEmpty() || queries.isEmpty() || formats.isEmpty())
         {

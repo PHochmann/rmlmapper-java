@@ -6,9 +6,10 @@
 @prefix wgs84_pos: <http://www.w3.org/2003/01/geo/wgs84_pos#lat>.
 @prefix gn: <http://www.geonames.org/ontology#>.
 @prefix ifcrml: <http://ifcrml.thisisnourl/ifcrml#>.
+
 @base <http://example.com/ns#>.
 
-<#VenueMapping> a rr:TriplesMap;
+<#IFCMapping> a rr:TriplesMap;
   rml:logicalSource [
     rml:source [
       rdf:type ifcrml:ifc;
@@ -19,10 +20,9 @@
       ifcrml:format "ifc2x3tc1"
     ];
 
+    rml:referenceFormulation ifcrml:IFCAttribute;
 
-    rml:referenceFormulation ifcrml:BimServerQL;
-
-    ifcrml:query """{
+    ifcrml:iterator """{
       "type": {
         "name": "IfcProduct",
         "includeAllSubTypes": "true"
@@ -32,6 +32,12 @@
   ];
 
   rr:subjectMap [
-    rr:template "http://loc.example.com/city/{GlobalId}";
-    rr:class schema:City
+    rr:template "http://example.com/{IfcType}/{GlobalId}";
+  ];
+
+  rr:predicateObjectMap [
+  rr:predicate rdf:type;
+  rr:objectMap [
+    rr:template "https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL/{IfcType}"
+    ]
   ].

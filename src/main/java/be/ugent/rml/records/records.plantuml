@@ -1,0 +1,64 @@
+@startuml
+
+  
+
+  namespace be.ugent.rml {
+    namespace records {
+      class be.ugent.rml.records.IFCRecord {
+          ~ obj : IdEObject
+          + IFCRecord()
+          + get()
+          + getDataType()
+      }
+    }
+  }
+  
+
+  namespace be.ugent.rml {
+    namespace records {
+      class be.ugent.rml.records.IFCRecordFactory {
+          + getRecords()
+      }
+    }
+  }
+  
+
+
+
+  namespace be.ugent.rml {
+    namespace records {
+      abstract class be.ugent.rml.records.Record {
+          {abstract} + get()
+          + getDataType()
+      }
+    }
+  }
+  
+
+
+
+
+  namespace be.ugent.rml {
+    namespace records {
+      interface be.ugent.rml.records.ReferenceFormulationRecordFactory {
+          {abstract} + getRecords()
+      }
+    }
+  }
+
+
+
+
+
+
+  be.ugent.rml.records.IFCRecord -up-|> be.ugent.rml.records.Record
+  be.ugent.rml.records.IFCRecordFactory .up.|> be.ugent.rml.records.ReferenceFormulationRecordFactory
+
+
+
+right footer
+
+
+endfooter
+
+@enduml

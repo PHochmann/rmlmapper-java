@@ -20,6 +20,7 @@ public class IFCRecord extends Record {
     public List<Object> get(String value)
     {
         if (value.equals("oid")) return Collections.singletonList(obj.getOid());
+        if (value.equals("IfcType")) return Collections.singletonList(obj.eClass().getName());
         return Collections.singletonList(obj.eGet(obj.eClass().getEStructuralFeature(value)));
     }
 
