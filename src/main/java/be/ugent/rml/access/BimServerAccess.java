@@ -1,5 +1,6 @@
 package be.ugent.rml.access;
 
+import be.ugent.rml.functions.FunctionModel;
 import org.bimserver.client.BimServerClient;
 import org.bimserver.client.json.JsonBimServerClientFactory;
 import org.bimserver.database.queries.om.DefaultQueries;
@@ -10,11 +11,14 @@ import org.bimserver.shared.exceptions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 
 public class BimServerAccess implements Access {
 
@@ -31,6 +35,7 @@ public class BimServerAccess implements Access {
         this.username = username;
         this.password = password;
         this.ifcPath = ifcPath;
+        if (query.equals("")) query = "{ }"; // Query is empty: We have a filtering fuction, query everything
         this.query = query;
         this.format = format;
     }

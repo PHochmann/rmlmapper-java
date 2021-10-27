@@ -4,6 +4,7 @@ import be.ugent.rml.NAMESPACES;
 import be.ugent.rml.Utils;
 import be.ugent.rml.access.Access;
 import be.ugent.rml.access.BimServerAccess;
+import be.ugent.rml.functions.ExecutionParser;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.term.Literal;
 import be.ugent.rml.term.NamedNode;
@@ -18,6 +19,8 @@ import org.bimserver.shared.exceptions.ServerException;
 import org.bimserver.shared.exceptions.UserException;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
@@ -52,8 +55,29 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
 
             List<Record> query_records = new ArrayList<>();
 
-            for (IdEObject obj : model) {
-                query_records.add(new IFCRecord(obj));
+            // Now is the time to check if we need to invoke a filtering function
+            List<Term> mappings = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "iteratorMapping"), null));
+            List<Term> executions = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "iteratorExecution"), null));
+
+            if (!mappings.isEmpty() && !executions.isEmpty()) {
+                Method fn_method = ExecutionParser.getMethod(rmlStore, mappings.get(0));
+                List<Object> fn_params = ExecutionParser.parseParamsFromExecution(rmlStore, executions.get(0));
+                fn_params.add(0, model.iterateAllObjects()); // Inject current IFC file into params
+                try {
+                    query_records = (List<Record>)fn_method.invoke(null, fn_params.toArray(new Object[0]));
+                } catch (IllegalArgumentException e) {
+                    throw e;
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                for (IdEObject obj : model) {
+                    query_records.add(new IFCRecord(obj));
+                }
             }
 
             return query_records;

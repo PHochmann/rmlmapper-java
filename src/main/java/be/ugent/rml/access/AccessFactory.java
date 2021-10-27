@@ -2,6 +2,9 @@ package be.ugent.rml.access;
 
 import be.ugent.rml.NAMESPACES;
 import be.ugent.rml.Utils;
+import be.ugent.rml.functions.ExecutionParser;
+import be.ugent.rml.functions.FunctionLoader;
+import be.ugent.rml.functions.FunctionModel;
 import be.ugent.rml.records.SPARQLResultFormat;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.term.Literal;
@@ -11,6 +14,8 @@ import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -208,13 +213,25 @@ public class AccessFactory {
         List<Term> formats   = Utils.getObjectsFromQuads(rmlStore.getQuads(source, new NamedNode(NAMESPACES.IFCRML + "format"), null));
 
         List<Term> queries   = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "iterator"), null));
+        List<Term> fno_filters = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "iteratorMapping"), null));
 
-        if (serverLocations.isEmpty() || users.isEmpty() || passwords.isEmpty() || paths.isEmpty() || queries.isEmpty() || formats.isEmpty())
+        if (serverLocations.isEmpty() || users.isEmpty() || passwords.isEmpty() || paths.isEmpty() || formats.isEmpty())
         {
             throw new Error("The IFC source object " + source + " does not contain all relevant information.");
         }
 
-        return new BimServerAccess(serverLocations.get(0).getValue(), users.get(0).getValue(), passwords.get(0).getValue(), paths.get(0).getValue(), queries.get(0).getValue(), formats.get(0).getValue());
+        /*if (queries.isEmpty() && fno_filters.isEmpty())
+        {
+            throw new Error("The IFC source object " + source + " does not contains an iterator or fno filtering function.");
+        }*/
+
+        return new BimServerAccess(
+                serverLocations.get(0).getValue(),
+                users.get(0).getValue(),
+                passwords.get(0).getValue(),
+                paths.get(0).getValue(),
+                queries.isEmpty() ? "" : queries.get(0).getValue(),
+                formats.get(0).getValue());
     }
 
     /**

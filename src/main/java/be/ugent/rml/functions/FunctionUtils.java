@@ -97,7 +97,7 @@ public class FunctionUtils {
         }
     }
 
-    private static Class getParamType(Term type) {
+    public static Class getParamType(Term type) {
         String typeStr = type.getValue();
 
         switch (typeStr) {
