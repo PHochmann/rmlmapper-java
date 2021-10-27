@@ -6,6 +6,7 @@ import be.ugent.rml.records.IFCRecord;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
+import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.bimserver.emf.IdEObject;
 
@@ -21,9 +22,24 @@ public class ExecutionParser {
         return new LinkedList<IFCRecord>();
     }
 
-    public static List<Object> parseParamsFromExecution(QuadStore store, Term execution)
+    private static Object castLookup(Class<?> clazz, String str) {
+        try {
+            if (clazz == Integer.class) {
+                return Integer.parseInt(str);
+            }
+            else {
+                return clazz.cast(str);
+            }
+        } catch (Exception e) {
+            throw new Error("Can't cast this data type (Todo but not in scope: Do lookup for non-builtin datatypes)");
+            // Should be done as given in http://www.java2s.com/Code/Java/Reflection/ConvertagivenStringintotheappropriateClass.htm
+        }
+    }
+
+    public static Pair<List<Class<?>>, List<Object>> parseParamsFromExecution(QuadStore store, Term execution)
     {
-        LinkedList<Object> result = new LinkedList<>();
+        List<Class<?>> classes = new LinkedList<>();
+        LinkedList<Object> params = new LinkedList<>();
 
         List<Term> functions = Utils.getObjectsFromQuads(store.getQuads(execution, new NamedNode(NAMESPACES.FNO_S + "executes"), null));
         if (functions.isEmpty()) throw new Error("No 'executes' found in execution");
@@ -33,13 +49,11 @@ public class ExecutionParser {
         if (expects.isEmpty()) throw new Error("No 'expects' found in function - if no params, at least specify empty list (TODO)");
         Term expectList = expects.get(0);
 
-        // Parse list of parameters (https://ontola.io/blog/ordered-data-in-rdf/)
-        while (!expectList.equals(new NamedNode(NAMESPACES.RDF + "nil")))
-        {
-            List<Term> firsts = Utils.getObjectsFromQuads(store.getQuads(expectList, new NamedNode(NAMESPACES.RDF + "first"), null));
-            if (firsts.isEmpty()) throw new Error("Malformed list: Does not have first");
-            Term first = firsts.get(0);
+        List<Term> params_list = Utils.getList(store, expectList);
 
+        // Parse list of parameters (https://ontola.io/blog/ordered-data-in-rdf/)
+        for (Term first : params_list)
+        {
             List<Term> paramPredicates = Utils.getObjectsFromQuads(store.getQuads(first, new NamedNode(NAMESPACES.FNO_S + "predicate"), null));
             if (paramPredicates.isEmpty()) throw new Error("Parameter does not have a predicate.");
             Term paramPredicate = paramPredicates.get(0);
@@ -60,26 +74,11 @@ public class ExecutionParser {
             }
 
             String actualParamStr = actualParam.getValue().replaceAll("^\"|\"$", "");
-
-            try {
-                if (classToCastTo == Integer.class) {
-                    result.add(Integer.parseInt(actualParamStr));
-                }
-                else {
-                    result.add(classToCastTo.cast(actualParamStr));
-                }
-            } catch (Exception e) {
-                throw new Error("Can't cast this data type (Todo but not in scope: Do lookup for non-builtin datatypes)");
-                // Should be done as given in http://www.java2s.com/Code/Java/Reflection/ConvertagivenStringintotheappropriateClass.htm
-            }
-
-
-            List<Term> rests = Utils.getObjectsFromQuads(store.getQuads(expectList, new NamedNode(NAMESPACES.RDF + "rest"), null));
-            if (rests.isEmpty()) throw new Error("Malformed list: Does not have rest");
-            expectList = rests.get(0);
+            params.add(castLookup(classToCastTo, actualParamStr));
+            classes.add(classToCastTo);
         }
 
-        return result;
+        return new Pair<>(classes, params);
     }
 
     public static Method getMethod(QuadStore store, Term mapping) {

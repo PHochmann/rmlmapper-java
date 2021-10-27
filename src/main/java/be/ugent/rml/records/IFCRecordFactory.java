@@ -11,6 +11,8 @@ import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.csv.CSVParser;
+import org.apache.jena.atlas.lib.Pair;
+import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.bimserver.client.BimServerClient;
 import org.bimserver.client.ClientIfcModel;
 import org.bimserver.emf.IdEObject;
@@ -61,10 +63,15 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
 
             if (!mappings.isEmpty() && !executions.isEmpty()) {
                 Method fn_method = ExecutionParser.getMethod(rmlStore, mappings.get(0));
-                List<Object> fn_params = ExecutionParser.parseParamsFromExecution(rmlStore, executions.get(0));
-                fn_params.add(0, model.iterateAllObjects()); // Inject current IFC file into params
+
+                Pair<List<Class<?>>, List<Object>> fn_params_and_classes = ExecutionParser.parseParamsFromExecution(rmlStore, executions.get(0));
+                List<Class<?>> classes = fn_params_and_classes.getLeft();
+                List<Object> params = fn_params_and_classes.getRight();
+
+                params.add(0, model.iterateAllObjects()); // Inject current IFC file into params
+
                 try {
-                    query_records = (List<Record>)fn_method.invoke(null, fn_params.toArray(new Object[0]));
+                    query_records = (List<Record>)fn_method.invoke(null, params.toArray(new Object[0]));
                 } catch (IllegalArgumentException e) {
                     throw e;
                 } catch (InvocationTargetException e) {
