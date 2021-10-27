@@ -9,6 +9,10 @@ import be.ugent.rml.term.Term;
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.bimserver.emf.IdEObject;
+import org.bimserver.models.ifc2x3tc1.IfcRelVoidsElement;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,6 +24,38 @@ public class ExecutionParser {
 
     public static List<IFCRecord> filterEntitiesFromBoxDistance(Iterator<IdEObject> entities, int x, int y, int z, int width, int height, int depth, int dist) {
         return new LinkedList<IFCRecord>();
+    }
+
+    private static Object getAttr(EObject obj, String attribute)
+    {
+        EStructuralFeature ftr = obj.eClass().getEStructuralFeature(attribute);
+        return ftr != null ? obj.eGet(ftr) : null;
+    }
+
+    public static List<IFCRecord> getOpeningsOfWall(Iterator<IdEObject> entities, String id) {
+
+        List<IFCRecord> res = new LinkedList<>();
+
+        while (entities.hasNext())
+        {
+            IdEObject obj = entities.next();
+            Object gid = getAttr(obj,"GlobalId");
+            if (gid != null && gid.equals(id)) {
+                for (EObject obj2 : obj.eCrossReferences()) {
+                    if (obj2.eClass().getName().equals("IfcRelVoidsElement")) {
+                        for (EObject obj3 : obj2.eCrossReferences())
+                        {
+                            if (obj3.eClass().getName().equals("IfcOpeningElement"))
+                            {
+                                res.add(new IFCRecord(obj3));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return res;
     }
 
     private static Object castLookup(Class<?> clazz, String str) {

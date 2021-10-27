@@ -2,16 +2,17 @@ package be.ugent.rml.records;
 
 import org.bimserver.client.BimServerClient;
 import org.bimserver.emf.IdEObject;
+import org.eclipse.emf.ecore.EObject;
 
 import java.util.Collections;
 import java.util.List;
 
 public class IFCRecord extends Record {
 
-    IdEObject obj;
+    EObject obj;
     //BimServerClient client;
 
-    public IFCRecord(IdEObject obj)
+    public IFCRecord(EObject obj)
     {
         this.obj = obj;
     }
@@ -19,7 +20,7 @@ public class IFCRecord extends Record {
     @Override
     public List<Object> get(String value)
     {
-        if (value.equals("oid")) return Collections.singletonList(obj.getOid());
+        //if (value.equals("oid")) return Collections.singletonList(obj.getOid());
         if (value.equals("IfcType")) return Collections.singletonList(obj.eClass().getName());
         return Collections.singletonList(obj.eGet(obj.eClass().getEStructuralFeature(value)));
     }
