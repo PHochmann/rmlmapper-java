@@ -36,6 +36,7 @@ public class RecordsFactory {
         referenceFormulationRecordFactoryMap.put(ReferenceFormulation.RDB, new CSVRecordFactory());
         referenceFormulationRecordFactoryMap.put(ReferenceFormulation.CSS3, new HTMLRecordFactory());
         referenceFormulationRecordFactoryMap.put(ReferenceFormulation.IFC, new IFCRecordFactory());
+        referenceFormulationRecordFactoryMap.put(ReferenceFormulation.CDQL, new ClassDiagramRecordFactory());
     }
 
     /**

@@ -9,4 +9,5 @@ public class ReferenceFormulation {
     public static String JSONPath = NAMESPACES.QL + "JSONPath";
     public static String CSS3 = NAMESPACES.QL + "CSS3";
     public static String IFC = NAMESPACES.IFCRML + "IFCAttribute";
+    public static String CDQL = NAMESPACES.CDRML + "cdQL";
 }

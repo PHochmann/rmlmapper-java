@@ -1,6 +1,0 @@
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_cY> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_cY> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Drehflügel 1-flg - Variabel:Drehflügel 1-flg - Variabel:7410290:1".
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_fs> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_fs> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Drehflügel 1-flg - Variabel:Drehflügel 1-flg - Variabel:7410086:1".
-<http://example.com/IfcOpeningElement/23YOSP0jP27gP4eexj9dTt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
-<http://example.com/IfcOpeningElement/23YOSP0jP27gP4eexj9dTt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:TB_7,00:7435764".

@@ -1,0 +1,32 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix rml: <http://semweb.mmlab.be/ns/rml#>.
+@prefix ql: <http://semweb.mmlab.be/ns/ql#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix schema: <http://schema.org/>.
+
+@prefix cdrml: <http://cdrml.thisisnourl/cdrml#>.
+@prefix fno: <https://w3id.org/function/ontology#> .
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
+@prefix fnoi: <https://w3id.org/function/vocabulary/implementation#> .
+@prefix ex: <http://example.com#>.
+
+@base <http://example.com/ns#>.
+
+<#ClassDiagramMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "SACHEN/test.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "attributes(Student)"
+  ];
+
+  rr:subjectMap [
+    rr:template "http://example.com/{Name}/{GlobalId}"
+  ];
+
+  rr:predicateObjectMap [
+  rr:predicate rdf:type;
+  rr:objectMap [
+    rr:template "https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#{IfcType}"
+    ]
+  ].
+  
