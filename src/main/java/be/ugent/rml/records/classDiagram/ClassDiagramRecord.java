@@ -1,4 +1,6 @@
-package be.ugent.rml.records;
+package be.ugent.rml.records.classDiagram;
+
+import be.ugent.rml.records.Record;
 
 import java.util.Collections;
 import java.util.List;
