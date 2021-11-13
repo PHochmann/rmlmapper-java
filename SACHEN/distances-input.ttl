@@ -15,53 +15,23 @@
 # PROBLEM DEFINITION BELOW  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ex:IFCDistanceFilter a fno:Function ;
-    fno:expects ( ex:intParamA ex:intParamB ex:intParamC ex:intParamD ex:intParamE ex:intParamF ex:intParamG ) .
+    fno:expects ( ex:stringParamA ex:intParamA ) .
 
-ex:intParamA a fno:Parameter;
-    fno:predicate ex:boxX ;
-    fno:type xsd:integer ;
-    fno:required "true"^^xsd:boolean .
-
-ex:intParamB a fno:Parameter;
-    fno:predicate ex:boxY ;
-    fno:type xsd:integer ;
-    fno:required "true"^^xsd:boolean .
-
-ex:intParamC a fno:Parameter;
-    fno:predicate ex:boxZ ;
-    fno:type xsd:integer ;
-    fno:required "true"^^xsd:boolean .
-
-ex:intParamD a fno:Parameter;
-    fno:predicate ex:boxWidth ;
-    fno:type xsd:integer ;
-    fno:required "true"^^xsd:boolean .
-
-ex:intParamE a fno:Parameter;
-    fno:predicate ex:boxHeight ;
-    fno:type xsd:integer ;
-    fno:required "true"^^xsd:boolean .
-
-ex:intParamF a fno:Parameter;
-    fno:predicate ex:boxDepth ;
-    fno:type xsd:integer ;
-    fno:required "true"^^xsd:boolean .
-
-ex:intParamG a fno:Parameter;
+ex:intParamA a fno:Parameter ;
     fno:predicate ex:minDistance ;
     fno:type xsd:integer ;
+    fno:required "true"^^xsd:boolean .
+
+ex:stringParamA a fno:Parameter ;
+    fno:predicate ex:boxId ;
+    fno:type xsd:string ;
     fno:required "true"^^xsd:boolean .
 
 ex:distanceFilterExecution
     a              fno:Execution ;
     fno:executes   ex:IFCDistanceFilter ;
-    ex:boxX        0^^xsd:integer ;
-    ex:boxY        1^^xsd:integer ;
-    ex:boxZ        2^^xsd:integer ;
-    ex:boxWidth    3^^xsd:integer ;
-    ex:boxHeight   4^^xsd:integer ;
-    ex:boxDepth    5^^xsd:integer ;
-    ex:minDistance 6^^xsd:integer .
+    ex:boxId       "0Eg7c0qrDCPxnT5bQp4tqX"^^xsd:string ;
+    ex:minDistance "100000"^^xsd:integer .
 
 ex:IFCFilters
     a                  fnoi:JavaClass ;
@@ -85,15 +55,16 @@ ex:distanceFilterMapping
       ifcrml:serverLocation "http://localhost:8082" ;
       ifcrml:password "123456" ;
       ifcrml:username "admin@admin.com" ;
-      ifcrml:path "SACHEN/test-small.ifc" ;
-      ifcrml:format "ifc2x3tc1"
+      ifcrml:path "SACHEN/test-openings.ifc" ;
+      ifcrml:format "ifc2x3tc1" ;
+      ifcrml:geometry "true"^^xsd:boolean
     ];
 
     rml:referenceFormulation ifcrml:IFCAttribute ;
 
     #ifcrml:iterator """{
     #  "type": {
-    #    "name": "IfcProduct",
+    #    "name": "IfcWallStandardCase",
     #    "includeAllSubTypes": "true"
     #  }
     #}"""

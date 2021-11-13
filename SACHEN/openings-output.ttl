@@ -1,6 +1,19 @@
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_cY> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_cY> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Drehflügel 1-flg - Variabel:Drehflügel 1-flg - Variabel:7410290:1".
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_fs> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
-<http://example.com/IfcOpeningElement/24EQe3fYv0gvUzxKLCd_fs> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Drehflügel 1-flg - Variabel:Drehflügel 1-flg - Variabel:7410086:1".
-<http://example.com/IfcOpeningElement/23YOSP0jP27gP4eexj9dTt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
-<http://example.com/IfcOpeningElement/23YOSP0jP27gP4eexj9dTt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:TB_7,00:7435764".
+<http://example.com/IfcWallStandardCase/2OqyRUW0PBbfbrWmKpWueO> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcWallStandardCase>.
+<http://example.com/IfcWallStandardCase/2OqyRUW0PBbfbrWmKpWueO> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:STB_25,00:7432397".
+
+<http://example.com/IfcOpeningElement/3uotu6Mc5Bzx0VyNANLGHa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
+<http://example.com/IfcOpeningElement/3uotu6Mc5Bzx0VyNANLGHa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Drehflügel 2-flg - Stahlzarge:Aluminium_1560_2135:7409167:1".
+<http://example.com/IfcDoor/3uotu6Mc5Bzx0VyM6NLGHa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcDoor>.
+<http://example.com/IfcDoor/3uotu6Mc5Bzx0VyM6NLGHa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Drehflügel 2-flg - Stahlzarge:Aluminium_1560_2135:7409167".
+<http://example.com/IfcOpeningElement/1yRXX9SoTEz8hm8V78ATRZ> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
+<http://example.com/IfcOpeningElement/1yRXX9SoTEz8hm8V78ATRZ> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:STB_25,00:7432397".
+<http://example.com/IfcOpeningElement/2o7QJVWZD6YxFJewocajYY> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
+<http://example.com/IfcOpeningElement/2o7QJVWZD6YxFJewocajYY> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:STB_25,00:7432397".
+<http://example.com/IfcOpeningElement/30qDzR_znFDBonyd_RRatn> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
+<http://example.com/IfcOpeningElement/30qDzR_znFDBonyd_RRatn> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:STB_25,00:7432397".
+<http://example.com/IfcOpeningElement/1y3_dTZdz7PBNKUU8HbDiC> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
+<http://example.com/IfcOpeningElement/1y3_dTZdz7PBNKUU8HbDiC> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:STB_25,00:7432397".
+<http://example.com/IfcOpeningElement/3eCyqfoib6qu1V5sHGPQkm> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
+<http://example.com/IfcOpeningElement/3eCyqfoib6qu1V5sHGPQkm> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:STB_25,00:7432397".
+<http://example.com/IfcOpeningElement/32I0BENP91cfFhEg3FqZ91> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://standards.buildingsmart.org/IFC/DEV/IFC2x3/FINAL/OWL#IfcOpeningElement>.
+<http://example.com/IfcOpeningElement/32I0BENP91cfFhEg3FqZ91> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Базовая стена:STB_25,00:7432397".

@@ -25,7 +25,7 @@ ex:paramA a fno:Parameter;
 ex:openingsFilterExecution
     a              fno:Execution ;
     fno:executes   ex:openingsFilter ;
-    ex:wallID      "2OqyRUW0PBbfbrWmKpWvSX"^^xsd:string .
+    ex:wallID      "2O_M2UD93Vq00000000EGW"^^xsd:string .
 
 ex:IFCFilters
     a                   fnoi:JavaClass ;
@@ -83,4 +83,5 @@ ex:openingsFilterMapping
         rml:reference "Name"
     ]
   ].
+
   

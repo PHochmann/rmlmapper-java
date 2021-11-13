@@ -211,6 +211,7 @@ public class AccessFactory {
         List<Term> passwords = Utils.getObjectsFromQuads(rmlStore.getQuads(source, new NamedNode(NAMESPACES.IFCRML + "password"), null));
         List<Term> paths     = Utils.getObjectsFromQuads(rmlStore.getQuads(source, new NamedNode(NAMESPACES.IFCRML + "path"), null));
         List<Term> formats   = Utils.getObjectsFromQuads(rmlStore.getQuads(source, new NamedNode(NAMESPACES.IFCRML + "format"), null));
+        List<Term> geometries   = Utils.getObjectsFromQuads(rmlStore.getQuads(source, new NamedNode(NAMESPACES.IFCRML + "geometry"), null));
 
         List<Term> queries   = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "iterator"), null));
         List<Term> fno_filters = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.IFCRML + "iteratorMapping"), null));
@@ -231,7 +232,8 @@ public class AccessFactory {
                 passwords.get(0).getValue(),
                 paths.get(0).getValue(),
                 queries.isEmpty() ? "" : queries.get(0).getValue(),
-                formats.get(0).getValue());
+                formats.get(0).getValue(),
+                geometries.isEmpty() ? false : geometries.get(0).getValue().equals("true"));
     }
 
     /**

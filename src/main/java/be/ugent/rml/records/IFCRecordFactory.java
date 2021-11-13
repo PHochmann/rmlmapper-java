@@ -53,7 +53,7 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
 
             query_project = client.getServiceInterface().getProjectByPoid(query_project.getOid());
 
-            ClientIfcModel model = client.getModel(query_project, query_project.getLastRevisionId(), true, false, false);
+            ClientIfcModel model = client.getModel(query_project, query_project.getLastRevisionId(), true, false, ((BimServerAccess)access).includeGeometry());
 
             List<Record> query_records = new ArrayList<>();
 
@@ -68,10 +68,12 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
                 List<Class<?>> classes = fn_params_and_classes.getLeft();
                 List<Object> params = fn_params_and_classes.getRight();
 
-                params.add(0, model.iterateAllObjects()); // Inject current IFC file into params
+                params.add(0, model); // Inject current IFC file into params
+                params.add(1, client);
+                params.add(2, query_project.getLastRevisionId());
 
                 try {
-                    query_records = (List<Record>)fn_method.invoke(null, params.toArray(new Object[0]));
+                    query_records = (List<Record>)fn_method.invoke(null, params.toArray(new Object[0])); // null as first arg because it's static method
                 } catch (IllegalArgumentException e) {
                     throw e;
                 } catch (InvocationTargetException e) {
