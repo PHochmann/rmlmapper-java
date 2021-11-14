@@ -3,6 +3,8 @@ package be.ugent.rml.records.classDiagram;
 import org.apache.jena.atlas.lib.Pair;
 import org.w3c.dom.Node;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -62,11 +64,39 @@ public class CdClass extends CdElement {
                 return name;
             } else {
                 if (ref.startsWith("base.")) {
+                    if (base == null) return null;
                     return base.get(ref.substring(ref.indexOf(".") + 1));
                 } else {
                     return null;
                 }
             }
         }
+    }
+
+    public List<CdClass> extractClasses(String selector) {
+
+        LinkedList<CdClass> res = new LinkedList<>();
+
+        if (selector.equals("base")) {
+            if (base != null) res.add(base);
+        } else {
+            if (selector.equals("children")) {
+                res.addAll(children);
+            } else {
+                if (selector.equals("used")) {
+                    for (CdUsage usage : uses) {
+                        res.add(usage.target);
+                    }
+                } else {
+                    if (selector.equals("users")) {
+                        for (CdUsage usedBy : usedBy) {
+                            res.add(usedBy.source);
+                        }
+                    }
+                }
+            }
+        }
+
+        return res;
     }
 }

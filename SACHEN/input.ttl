@@ -16,17 +16,18 @@
   rml:logicalSource [
     rml:source "SACHEN/test.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
-    rml:iterator "usages"
+    rml:iterator "usages of Address"
   ];
 
   rr:subjectMap [
-    rr:template "http://example.com/{id}"
-  ];
-
-  rr:predicateObjectMap [
-    rr:predicate ex:label;
-    rr:objectMap [
-      rml:reference "label"
-    ]
+    rr:template "http://example.com/{label}" ;
+    rr:class ex:Class
   ].
+
+  #rr:predicateObjectMap [
+  #  rr:predicate ex:label;
+  #  rr:objectMap [
+  #    rml:reference "label"
+  #  ]
+  #].
   
