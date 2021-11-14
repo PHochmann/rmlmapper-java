@@ -29,4 +29,20 @@ public class CdAttribute extends CdElement {
         }
     }
 
+    public String get(String ref) {
+        if (ref.equals("id")) {
+            return id;
+        } else {
+            if (ref.equals("name")) {
+                return name;
+            } else {
+                if (ref.startsWith("class.")) {
+                    return clazz.get(ref.substring(ref.indexOf(".") + 1));
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+
 }

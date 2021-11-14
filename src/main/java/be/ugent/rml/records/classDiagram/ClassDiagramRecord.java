@@ -7,13 +7,38 @@ import java.util.List;
 
 public class ClassDiagramRecord extends Record {
 
-    public ClassDiagramRecord() {
+    CdUsage usage = null;
+    CdClass clazz = null;
+    CdAttribute attribute = null;
 
+    public ClassDiagramRecord(CdUsage usage) {
+        this.usage = usage;
+    }
+
+    public ClassDiagramRecord(CdClass clazz) {
+        this.clazz = clazz;
+    }
+
+    public ClassDiagramRecord(CdAttribute attribute) {
+        this.attribute = attribute;
     }
 
     @Override
-    public List<Object> get(String value) {
-        return Collections.singletonList("test");
+    public List<Object> get(String ref) {
+
+        if (clazz != null) {
+            return Collections.singletonList(clazz.get(ref));
+        }
+
+        if (usage != null) {
+            return Collections.singletonList(usage.get(ref));
+        }
+
+        if (attribute != null) {
+            return Collections.singletonList(attribute.get(ref));
+        }
+
+        return null;
     }
 
 }

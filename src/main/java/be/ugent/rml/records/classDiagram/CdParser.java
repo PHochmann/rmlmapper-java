@@ -9,6 +9,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 public class CdParser {
@@ -25,6 +26,18 @@ public class CdParser {
 
     public CdParser(Document xmlDoc) {
         this.doc = xmlDoc;
+    }
+
+    public Enumeration<CdClass> getClasses() {
+        return classes.elements();
+    }
+
+    public Enumeration<CdAttribute> getAttributes() {
+        return attributes.elements();
+    }
+
+    public Enumeration<CdUsage> getUsages() {
+        return usages.elements();
     }
 
     String[] getStyles(Node node) {

@@ -53,4 +53,20 @@ public class CdClass extends CdElement {
     public void setSeparatorY(double y) {
         this.separatorY = y;
     }
+
+    public String get(String ref) {
+        if (ref.equals("id")) {
+            return id;
+        } else {
+            if (ref.equals("name")) {
+                return name;
+            } else {
+                if (ref.startsWith("base.")) {
+                    return base.get(ref.substring(ref.indexOf(".") + 1));
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
 }

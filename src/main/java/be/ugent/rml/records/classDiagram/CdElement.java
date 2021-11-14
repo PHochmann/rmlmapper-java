@@ -11,4 +11,6 @@ abstract public class CdElement {
         this.id = node.getAttributes().getNamedItem("id").getTextContent();
         this.node = node;
     }
+
+    abstract public String get(String reference) throws Exception;
 }
