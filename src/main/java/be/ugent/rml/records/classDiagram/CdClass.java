@@ -83,12 +83,12 @@ public class CdClass extends CdElement {
             if (selector.equals("children")) {
                 res.addAll(children);
             } else {
-                if (selector.equals("used")) {
+                if (selector.equals("usedClasses")) {
                     for (CdUsage usage : uses) {
                         res.add(usage.target);
                     }
                 } else {
-                    if (selector.equals("users")) {
+                    if (selector.equals("userClasses")) {
                         for (CdUsage usedBy : usedBy) {
                             res.add(usedBy.source);
                         }

@@ -1,0 +1,73 @@
+Iterator: Ein Iterator extrahiert Records. Diese Records sind entweder...
+    - Nur Klassen: Haben einen Namen, eine Basisklasse, abgeleitete Klassen, benutzte und benutzende Klassen
+    - Nur Attribute: Haben aktuell nur einen Namen (Todo: Sichtbarkeit, Datentyp etc.)
+    - Nur Uses-Beziehungen: Haben ein Label, zwei Kardinalitäten, Benutzerklasse und benutzende Klasse
+
+Es würde keinen Sinn ergeben, gemischte Records der Mappingschleife zu übergeben, da nicht klar wäre, welche Referenzen an einem bestimmten Record erlaubt sind!
+
+Generelle Idee des Iterators:
+    - Hauptbestandteil des Iterators ist eine ClassSelection, die eine Menge an Klassen selektiert.
+    - Eine ClassSelection besteht aus beliebig vielen durch Punktoperatoren getrennten Statements.
+    - Erstes Statement: Rekursionsanfang, es werden entweder alle Klassen selektiert (*) oder eine Klasse mit einem bestimmten Namen.
+    - Weitere Statements: .base/.children/.usedClasses/.userClasses
+        * Verändert die Menge an selektieren Klassen indem für jede vorher selektierte Klasse das Statement ausgewertet wird
+        * Das Ergebnis ist für jede Klasse beliebig viele Klassen, die der Ergebnismenge hinzugefügt werden.
+        * Ergebnis der ClassSelection ist die nach dem letzten Statement ausgewählte Menge an Klassen.
+
+    - Beispiele für ClassSelections:
+        *                         # Alle Klassen
+        *.base                    # Die Basisklassen von allen Klassen (d.h. alle Klassen, die mind. ein Child haben)
+        Student                   # Die Klasse Student
+        Student.children          # Die von Student abgeleiteten Klassen
+        Student.children.children # Die von den von Student abgeleiteten Klassen abgeleiteten Klassen
+        *.usedClasses             # Die Klassen, die von einer anderen Klasse benutzt werden
+                                  # Erklärung: 1. Schritt: Selektiert alle Klassen
+                                  #            2. Schritt: Folgt für jede Klasse aus Schritt 1 dem uses-Pfeil, falls er existiert, und fügt die Klasse, auf die gezeigt wird, der Ergebnismenge hinzu
+        Address.userClasses       # Alle Klassen, die die Klasse "Address" benutzen
+
+    - Um nun auch auf die Attribute und Uses-Beziehungen zugreifen zu können, kann ClassSelections
+        "attributes of...", "usages by..." und "usages of..." vorgestellt werden
+    - Uses-Beziehungen müssen Records sein können, da nur so auf ihre Kardinalitäten zugegriffen werden kann
+        * Eine Klasse kann beliebig viele ausgehende bzw. eingehende Uses-Pfeile haben, das heißt nicht als ReferenceFormulation machbar, da diese Single-valued ist
+
+
+Syntax des Iterators:
+    Iterator := "attributes of " ClassSelector              # Der Iterator wenn Attribute der ClassSelection die Records sein sollen
+    Iterator := "usages by " ClassSelector                  # Der Iterator wenn die ausgehenden Uses-Beziehungen der ClassSelection die Records sein sollen
+    Iterator := "usages of " ClassSelector                  # Der Iterator wenn die eingehenden Uses-Beziehungen der ClassSelection die Records sein sollen
+    Iterator := ClassSelector                               # Der Iterator wenn die ClassSelection selber die Records sein sollen (also Klassen)
+
+    ClassSelectorEntry := "*" ClassSelector                 # Induktionsanfang der ClassSelection: Es werden alle Klassen selektiert
+    ClassSelectorEntry := Text ClassSelector                # Induktionsanfang der ClassSelection: Es wird eine Klasse mit einem bestimmten Namen selektiert
+
+    ClassSelector := ".base" ClassSelector                  # Es werden die Basisklassen der aktuell selektierten Klassen selektiert
+    ClassSelector := ".children" ClassSelector              # Analog dazu: Kinder 
+    ClassSelector := ".usedClasses" ClassSelector           # Analog dazu: Genutzte Klassen
+    ClassSelector := ".userClasses" ClassSelector           # Analog dazu: Nutzende Klassen
+
+
+
+################################################################################################################
+ReferenceFormulation: Extrahiert Text an einem Record. Ein Record ist entweder (1) Eine Klasse (2) Ein Attribut (3) Eine Uses-Beziehung
+    Generell: Es können alle Single-Valued-Attribute von Klassen/Attributen/Uses-Beziehungen extrahiert werden
+    Keine Listen, das eine Referenz zu genau einem String werden muss!
+
+Syntax der ReferenceFormulation:
+(1) Klasse
+    ClassReferenceFormulation := "id"
+    ClassReferenceFormulation := "name"
+    ClassReferenceFormulation := "base." ClassReferenceFormulation
+
+(2) Attribut
+    AttribReferenceFormulation := "id"
+    AttribReferenceFormulation := "name"
+    AttribReferenceFormulation := "class." ClassReferenceFormulation   # Man beachte, dass man wieder eine Klasse auswählt, sodass die ReferenceFormulation wieder wie für eine Klasse fortgesetzt werden muss!
+    (Todo: Function oder Field? Sichtbarkeit? Datentyp? -> Mehr aus XML Parsen!)
+
+(3) Uses-Beziehung
+    UsesReferenceFormulation := "id"
+    UsesReferenceFormulation := "label"
+    UsesReferenceFormulation := "sourceCardinality"
+    UsesReferenceFormulation := "targetCardinality"
+    UsesReferenceFormulation := "source." ClassReferenceFormulation
+    UsesReferenceFormulation := "target." ClassReferenceFormulation

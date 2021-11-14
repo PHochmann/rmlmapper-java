@@ -16,11 +16,11 @@
   rml:logicalSource [
     rml:source "SACHEN/test.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
-    rml:iterator "usages of Address"
+    rml:iterator "usages by Address.userClasses"
   ];
 
   rr:subjectMap [
-    rr:template "http://example.com/{label}" ;
+    rr:template "http://example.com/{target.name}" ;
     rr:class ex:Class
   ].
 
