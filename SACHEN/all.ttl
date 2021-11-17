@@ -1,0 +1,106 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix rml: <http://semweb.mmlab.be/ns/rml#>.
+@prefix ql: <http://semweb.mmlab.be/ns/ql#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix schema: <http://schema.org/>.
+
+@prefix cdrml: <http://cdrml.thisisnourl/cdrml#>.
+@prefix fno: <https://w3id.org/function/ontology#> .
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
+@prefix fnoi: <https://w3id.org/function/vocabulary/implementation#> .
+@prefix cd: <http://example.com#>.
+
+@base <http://example.com/ns#>.
+
+<#ClassMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "SACHEN/test.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "*"
+  ];
+
+  rr:subjectMap [
+    rr:template "http://example.com/Classes/{id}" ;
+    rr:class cd:Class
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:hasName;
+    rr:objectMap [
+      rml:reference "name"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:childClassOf;
+    rr:objectMap [
+      rr:template "http://example.com/Classes/{base.id}"
+    ]
+  ].
+  
+
+<#AttributeMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "SACHEN/test.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "attributes of *"
+  ];
+
+  rr:subjectMap [
+    rr:template "http://example.com/Attributes/{name}" ;
+    rr:class cd:Attribute
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:containingClass;
+    rr:objectMap [
+      rr:template "http://example.com/Classes/{class.id}"
+    ]
+  ].
+
+<#UsageMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "SACHEN/test.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "usages of *"
+  ];
+
+  rr:subjectMap [
+    rr:template "http://example.com/Usages/{id}" ;
+    rr:class cd:Usage
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:label;
+    rr:objectMap [
+      rml:reference "label"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:sourceCardinality;
+    rr:objectMap [
+      rml:reference "sourceCardinality"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:targetCardinality;
+    rr:objectMap [
+      rml:reference "targetCardinality"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:target;
+    rr:objectMap [
+      rr:template "http://example.com/Classes/{target.id}"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:source;
+    rr:objectMap [
+      rr:template "http://example.com/Classes/{source.id}"
+    ]
+  ].

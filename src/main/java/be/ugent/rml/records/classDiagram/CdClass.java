@@ -1,25 +1,24 @@
 package be.ugent.rml.records.classDiagram;
 
-import org.apache.jena.atlas.lib.Pair;
 import org.w3c.dom.Node;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class CdClass extends CdElement {
     String name;
+    boolean interf;
     CdClass base;
     double separatorY;
     List<CdClass> children;
-    List<CdUsage> uses;
-    List<CdUsage> usedBy;
+    List<CdArrow> uses;
+    List<CdArrow> usedBy;
     List<CdAttribute> attributes;
 
-    public CdClass(Node node) {
+    public CdClass(Node node, boolean interf) {
         super(node);
         this.name = node.getAttributes().getNamedItem("value").getTextContent();
+        this.interf = interf;
         this.children = new LinkedList<>();
         this.uses = new LinkedList<>();
         this.usedBy = new LinkedList<>();
@@ -32,7 +31,7 @@ public class CdClass extends CdElement {
         child.base = this;
     }
 
-    public void addUse(CdUsage use) {
+    public void addUse(CdArrow use) {
         uses.add(use);
         use.target.usedBy.add(use);
     }
@@ -84,12 +83,12 @@ public class CdClass extends CdElement {
                 res.addAll(children);
             } else {
                 if (selector.equals("usedClasses")) {
-                    for (CdUsage usage : uses) {
+                    for (CdArrow usage : uses) {
                         res.add(usage.target);
                     }
                 } else {
                     if (selector.equals("userClasses")) {
-                        for (CdUsage usedBy : usedBy) {
+                        for (CdArrow usedBy : usedBy) {
                             res.add(usedBy.source);
                         }
                     }

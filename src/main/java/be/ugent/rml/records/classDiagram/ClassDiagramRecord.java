@@ -7,11 +7,11 @@ import java.util.List;
 
 public class ClassDiagramRecord extends Record {
 
-    CdUsage usage = null;
+    CdArrow usage = null;
     CdClass clazz = null;
     CdAttribute attribute = null;
 
-    public ClassDiagramRecord(CdUsage usage) {
+    public ClassDiagramRecord(CdArrow usage) {
         this.usage = usage;
     }
 

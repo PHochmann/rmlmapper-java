@@ -12,7 +12,10 @@ public class CdAttribute extends CdElement {
     public CdAttribute(Node node, CdAttributeType attrib_type) {
         super(node);
         this.attrib_type = attrib_type;
-        String[] words = node.getAttributes().getNamedItem("value").getTextContent().split(" ");
+
+        this.name = node.getAttributes().getNamedItem("value").getTextContent();
+
+        /*String[] words = node.getAttributes().getNamedItem("value").getTextContent().split(" ");
         if (words.length == 1) {
             name = words[0];
         } else {
@@ -26,7 +29,7 @@ public class CdAttribute extends CdElement {
                     modifier = words[0];
                 }
             }
-        }
+        }*/
     }
 
     public String get(String ref) {
