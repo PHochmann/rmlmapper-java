@@ -45,22 +45,6 @@ public class CdParser {
         return style.getTextContent().split(";");
     }
 
-    String getAttr(Node node, String attr) {
-        Node a = node.getAttributes().getNamedItem(attr);
-        if (a == null) return null;
-        return a.getTextContent();
-    }
-
-    Node getChildNode(Node outer, String innerName) {
-        NodeList children = outer.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            if (children.item(i).getNodeName().equals(innerName)) {
-                return children.item(i);
-            }
-        }
-        return null;
-    }
-
     public void parseClassDiagram() throws Exception {
 
         // Create lookup-table for all cells
@@ -99,7 +83,7 @@ public class CdParser {
                     {
                         CdClass parent = classes.get(parent_id);
                         if (parent != null) {
-                            Node geometry = getChildNode(cell, "mxGeometry");
+                            Node geometry = CdUtils.getChildNode(cell, "mxGeometry");
                             double y = Double.parseDouble(getAttr(geometry, "y"));
                             parent.setSeparatorY(y);
                         }
@@ -118,7 +102,7 @@ public class CdParser {
                     String parent_id = getAttr(cell, "parent");
                     if (parent_id != null) {
                         // Get y to determine if it's a field or a function
-                        Node geometry = getChildNode(cell, "mxGeometry");
+                        Node geometry = CdUtils.getChildNode(cell, "mxGeometry");
                         double y = Double.parseDouble(getAttr(geometry, "y"));
 
                         CdClass parent = classes.get(parent_id);
@@ -197,7 +181,7 @@ public class CdParser {
 
                 CdArrow usage = usages.get(parent_id);
                 if (usage != null) {
-                    Node geometry = getChildNode(cell, "mxGeometry");
+                    Node geometry = CdUtils.getChildNode(cell, "mxGeometry");
                     double x = Double.parseDouble(getAttr(geometry, "x"));
                     if (x < -0.8) {
                         usage.setSourceCardinality(getAttr(cell, "value"));

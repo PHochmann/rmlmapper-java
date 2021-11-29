@@ -6,6 +6,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CdClass extends CdElement {
+
+    class Rectangle {
+        double x;
+        double y;
+        double width;
+        double height;
+
+        Rectangle(double x, double y, double width, double height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+    }
+
     String name;
     boolean interf;
     CdClass base;
@@ -14,6 +29,7 @@ public class CdClass extends CdElement {
     List<CdArrow> uses;
     List<CdArrow> usedBy;
     List<CdAttribute> attributes;
+    Rectangle rect;
 
     public CdClass(Node node, boolean interf) {
         super(node);
@@ -24,6 +40,8 @@ public class CdClass extends CdElement {
         this.usedBy = new LinkedList<>();
         this.attributes = new LinkedList<>();
         this.node = node;
+        this.rect = null;
+        extractRectangle();
     }
 
     public void addChild(CdClass child) {
@@ -70,6 +88,26 @@ public class CdClass extends CdElement {
                 }
             }
         }
+    }
+
+    private void extractRectangle() {
+        Node geometry = CdUtils.getChildNode(this.node, "mxGeometry");
+        if (geometry == null) return;
+
+        this.rect = new Rectangle(Double.parseDouble(CdUtils.getAttribute(geometry, "x")),
+                Double.parseDouble(CdUtils.getAttribute(geometry, "y")),
+                Double.parseDouble(CdUtils.getAttribute(geometry, "width")),
+                Double.parseDouble(CdUtils.getAttribute(geometry, "height")));
+    }
+
+    public double getDistanceToBox(double x, double y) {
+        if (this.rect == null) {
+            System.out.println("Class " + name + " does not have a rectangle, can't compute distance");
+            return Double.MAX_VALUE;
+        }
+
+        double dx = Math.min(rect.x - x, x - rect.width - rect.x);
+        double dy = Math.min(Math.abs(rect.y - y), Math.abs(rex));
     }
 
     public List<CdClass> extractClasses(String selector) {
