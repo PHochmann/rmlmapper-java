@@ -8,6 +8,7 @@ import be.ugent.rml.records.ReferenceFormulationRecordFactory;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
+import org.rdfhdt.hdt.iterator.utils.Iter;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -17,9 +18,18 @@ import java.util.*;
 
 public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFactory {
 
-    static final String ATTRIBUTES_OF = "attributes of ";
-    static final String USAGES_BY = "usages by ";
-    static final String USAGES_OF = "usages of ";
+    final String OF = "of";
+    final String BY = "by";
+
+    Dictionary<String, CdArrowType> arrowMapping;
+
+    public ClassDiagramRecordFactory() {
+        arrowMapping = new Hashtable<>();
+        arrowMapping.put("associations", CdArrowType.CD_ARROW_ASSOCIATION);
+        arrowMapping.put("aggregations", CdArrowType.CD_ARROW_AGGREGATION);
+        arrowMapping.put("compositions", CdArrowType.CD_ARROW_COMPOSITION);
+        arrowMapping.put("dependencies", CdArrowType.CD_ARROW_DEPENDENCY);
+    }
 
     @Override
     public List<Record> getRecords(Access access, Term logicalSource, QuadStore rmlStore) throws Exception {
@@ -41,38 +51,22 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
         List<Record> res = new LinkedList<>();
         List<CdClass> classSelection = new LinkedList<>();
 
-        String classSelectorString = iterator;
-        int whatsWanted = 0; // 0: Classes, 1: Attributes, 2: Uses, 3: UsedBy
+        String[] iteratorWords = iterator.trim().split(" ");
 
-        if (iterator.startsWith(ATTRIBUTES_OF)) {
-            classSelectorString = classSelectorString.substring(ATTRIBUTES_OF.length());
-            whatsWanted = 1;
-        } else {
-            if (iterator.startsWith(USAGES_BY)) {
-                classSelectorString = classSelectorString.substring(USAGES_BY.length());
-                whatsWanted = 2;
-            } else {
-                if (iterator.startsWith(USAGES_OF)) {
-                    classSelectorString = classSelectorString.substring(USAGES_OF.length());
-                    whatsWanted = 3;
-                }
-            }
-        }
-
+        String classSelectorString = iteratorWords[iteratorWords.length - 1];
         String[] steps = classSelectorString.split("\\.");
         if (steps.length == 0) {
             throw new Exception("Iterator is malformed: Empty string");
         }
 
         if (steps[0].equals("*")) { // Add all classes
-            Enumeration<CdClass> classes = parser.getClasses();
-            while (classes.hasMoreElements()) {
-                classSelection.add(classes.nextElement());
+            Collection<CdClass> classes = parser.getClasses();
+            for (CdClass clazz : classes) {
+                classSelection.add(clazz);
             }
         } else {
-            Enumeration<CdClass> classes = parser.getClasses();
-            while (classes.hasMoreElements()) {
-                CdClass curr = classes.nextElement();
+            Collection<CdClass> classes = parser.getClasses();
+            for (CdClass curr : classes) {
                 if (curr.name.equals(steps[0])) {
                     classSelection.add(curr);
                     break;
@@ -95,24 +89,47 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
         }
 
         for (CdClass clazz : classSelection) {
-            if (whatsWanted == 0) {
+            // Now see which records were actually requestes
+            // Case 1: Classes
+            if (iteratorWords.length == 1) {
                 res.add(new ClassDiagramRecord(clazz));
-            } else {
-                if (whatsWanted == 1) {
+            }
+
+            if (iteratorWords.length == 3) {
+                // Case 2: Attributes
+                if (iteratorWords[0].equals("attributes") && iteratorWords[1].equals("of")) {
                     for (CdAttribute attr : clazz.attributes) {
                         res.add(new ClassDiagramRecord(attr));
                     }
                 } else {
-                    if (whatsWanted == 2) {
-                        for (CdArrow usage : clazz.uses) {
+                    // Case 3: usages or other arrows
+                    // Must be arrow - either usages to catch all or specific arrow type
+                    List<CdArrow> arrows = null;
+                    if (iteratorWords[1].equals(OF)) {
+                        arrows = clazz.uses;
+                    } else {
+                        if (iteratorWords[1].equals(BY)) {
+                            arrows = clazz.usedBy;
+                        } else {
+                            throw new Exception("Second iterator word not 'of' or 'by'");
+                        }
+                    }
+
+                    if (iteratorWords[0].equals("usages")) {
+                        for (CdArrow usage : arrows) {
                             res.add(new ClassDiagramRecord(usage));
                         }
                     } else {
-                        for (CdArrow usage : clazz.usedBy) {
-                            res.add(new ClassDiagramRecord(usage));
+                        CdArrowType type = arrowMapping.get(iteratorWords[0]);
+                        for (CdArrow usage : arrows) {
+                            if (usage.type == type) {
+                                res.add(new ClassDiagramRecord(usage));
+                            }
                         }
                     }
                 }
+            } else {
+                throw new Exception("Iterator malformed: Not 1 or 3 words");
             }
         }
 

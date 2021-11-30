@@ -106,8 +106,9 @@ public class CdClass extends CdElement {
             return Double.MAX_VALUE;
         }
 
-        double dx = Math.min(rect.x - x, x - rect.width - rect.x);
-        double dy = Math.min(Math.abs(rect.y - y), Math.abs(rex));
+        double dx = Math.max(Math.max(rect.x - x, 0), x - rect.x - rect.width);
+        double dy = Math.max(Math.max(rect.y - y, 0), y - rect.y - rect.height);
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     public List<CdClass> extractClasses(String selector) {

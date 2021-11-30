@@ -14,7 +14,7 @@
 
 <#ClassDiagramMapping> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "SACHEN/test.xml" ;
+    rml:source "SACHEN/test-broken-arrows.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
     rml:iterator "usages by Address.userClasses"
   ];

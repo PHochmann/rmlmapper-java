@@ -7,42 +7,62 @@ import org.w3c.dom.NodeList;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.*;
 
 public class CdParser {
+
+    final double MAX_RECOVERABLE_DISTANCE = 300;
 
     Document doc;
 
     // To lookup cells fast and get parent/source/destination-cross references in a single pass
-    Dictionary<String, Node> cells = new Hashtable<>();
+    Map<String, Node> cells = new HashMap<>();
 
 
-    Dictionary<String, CdClass> classes  = new Hashtable<>();
-    Dictionary<String, CdAttribute> attributes = new Hashtable<>();
-    Dictionary<String, CdArrow> usages = new Hashtable<>();
+    Map<String, CdClass> classes  = new HashMap<>();
+    Map<String, CdAttribute> attributes = new HashMap<>();
+    Map<String, CdArrow> usages = new HashMap<>();
 
     public CdParser(Document xmlDoc) {
         this.doc = xmlDoc;
     }
 
-    public Enumeration<CdClass> getClasses() {
-        return classes.elements();
+    public Collection<CdClass> getClasses() {
+        return classes.values();
     }
 
-    public Enumeration<CdAttribute> getAttributes() {
-        return attributes.elements();
+    public Collection<CdAttribute> getAttributes() {
+        return attributes.values();
     }
 
-    public Enumeration<CdArrow> getUsages() {
-        return usages.elements();
+    public Collection<CdArrow> getUsages() {
+        return usages.values();
     }
 
     String[] getStyles(Node node) {
         Node style = node.getAttributes().getNamedItem("style");
         if (style == null) return null;
         return style.getTextContent().split(";");
+    }
+
+    public CdClass getNearestClass(double x, double y) {
+        CdClass nearest = null;
+        double min_dist = Double.MAX_VALUE;
+
+        for (CdClass curr : getClasses()) {
+            double dist = curr.getDistanceToBox(x, y);
+            if (dist < min_dist) {
+                min_dist = dist;
+                nearest = curr;
+            }
+        }
+
+        if (min_dist > MAX_RECOVERABLE_DISTANCE) {
+            System.out.println("Arrow attachment to class not recoverable: max distance exceeded.");
+            return null;
+        } else {
+            return nearest;
+        }
     }
 
     public void parseClassDiagram() throws Exception {
@@ -64,7 +84,7 @@ public class CdParser {
                 CdClass clazz = new CdClass(nodes.item(i), false);
                 classes.put(clazz.id, clazz);
             } else { // Interfaces have to be detected differently
-                String val = getAttr(nodes.item(i), "value");
+                String val = CdUtils.getAttribute(nodes.item(i), "value");
                 if (val != null && val.contains("«interface»")) {
                     CdClass clazz = new CdClass(nodes.item(i), true);
                     classes.put(clazz.id, clazz);
@@ -78,13 +98,13 @@ public class CdParser {
             String[] styles = getStyles(cell);
             if (styles != null && styles.length > 0) {
                 if (styles[0].equals("line")) {
-                    String parent_id = getAttr(cell, "parent");
+                    String parent_id = CdUtils.getAttribute(cell, "parent");
                     if (parent_id != null)
                     {
                         CdClass parent = classes.get(parent_id);
                         if (parent != null) {
                             Node geometry = CdUtils.getChildNode(cell, "mxGeometry");
-                            double y = Double.parseDouble(getAttr(geometry, "y"));
+                            double y = Double.parseDouble(CdUtils.getAttribute(geometry, "y"));
                             parent.setSeparatorY(y);
                         }
                     }
@@ -99,11 +119,11 @@ public class CdParser {
             if (styles != null && styles.length > 0) {
                 if (styles[0].equals("text")) {
                     // Check if cell has parent that is class
-                    String parent_id = getAttr(cell, "parent");
+                    String parent_id = CdUtils.getAttribute(cell, "parent");
                     if (parent_id != null) {
                         // Get y to determine if it's a field or a function
                         Node geometry = CdUtils.getChildNode(cell, "mxGeometry");
-                        double y = Double.parseDouble(getAttr(geometry, "y"));
+                        double y = Double.parseDouble(CdUtils.getAttribute(geometry, "y"));
 
                         CdClass parent = classes.get(parent_id);
                         if (parent != null) {
@@ -124,22 +144,65 @@ public class CdParser {
             String[] styles = getStyles(cell);
             if (styles != null) {
                 if (CdUtils.getStyle(cell, "endArrow") != null) {
-                    String source_id = getAttr(cell, "source");
-                    String target_id = getAttr(cell, "target");
 
-                    if (source_id == null || target_id == null) {
-                        throw new Exception("No source/destination in arrow");
-                        // Todo: reconstruct geometrically
+                    String source_id = CdUtils.getAttribute(cell, "source");
+                    String target_id = CdUtils.getAttribute(cell, "target");
+                    CdClass source = null;
+                    CdClass target = null;
+
+                    String mxpoints_xpath = "mxGeometry/mxPoint";
+                    NodeList mxPoints = (NodeList)xpath.evaluate(mxpoints_xpath, cell, XPathConstants.NODESET);
+
+                    if (source_id == null) {
+                        System.out.println("Note: No source in arrow, trying to recover...");
+                        for (int j = 0; j < mxPoints.getLength(); j++) {
+                            String as_string = CdUtils.getAttribute(mxPoints.item(j), "as");
+                            if (as_string != null && as_string.equals("sourcePoint")) {
+                                double x = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "x"));
+                                double y = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "y"));
+                                source = getNearestClass(x, y);
+                                System.out.println("Note: Recovered arrow from " + source.name);
+                                break;
+                            }
+                        }
+
+                        if (source == null) {
+                            throw new Exception("No target id and could not recover target class");
+                        }
+                    }
+                    else
+                    {
+                        source = classes.get(source_id);
                     }
 
-                    CdClass source = classes.get(source_id);
-                    CdClass target = classes.get(target_id);
+                    if (target_id == null) {
+                        System.out.println("Note: No target in arrow, trying to recover...");
+                        for (int j = 0; j < mxPoints.getLength(); j++) {
+                            String as_string = CdUtils.getAttribute(mxPoints.item(j), "as");
+                            if (as_string != null && as_string.equals("targetPoint")) {
+                                double x = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "x"));
+                                double y = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "y"));
+                                target = getNearestClass(x, y);
+                                System.out.println("Note: Recovered arrow to " + target.name);
+                                break;
+                            }
+                        }
 
+                        if (target == null) {
+                            throw new Exception("No target id and could not recover target class");
+                        }
+                    }
+                    else
+                    {
+                        target = classes.get(target_id);
+                    }
+
+                    
                     // Maybe, arrow is not connected to class but to something else accidentally
                     if (source == null) {
                         Node node = cells.get(source_id);
                         if (node != null) {
-                            source_id = getAttr(node, "parent");
+                            source_id = CdUtils.getAttribute(node, "parent");
                             source = classes.get(source_id);
                         }
                     }
@@ -147,7 +210,7 @@ public class CdParser {
                     if (target == null) {
                         Node node = cells.get(target_id);
                         if (node != null) {
-                            target_id = getAttr(node, "parent");
+                            target_id = CdUtils.getAttribute(node, "parent");
                             target = classes.get(target_id);
                         }
                     }
@@ -174,7 +237,7 @@ public class CdParser {
             Node cell = nodes.item(i);
             String resizable_str = CdUtils.getStyle(cell,"resizable");
             if (resizable_str != null && resizable_str.equals("0")) {
-                String parent_id = getAttr(cell, "parent");
+                String parent_id = CdUtils.getAttribute(cell, "parent");
                 if (parent_id == null) {
                     throw new Exception("Text without parent");
                 }
@@ -182,14 +245,14 @@ public class CdParser {
                 CdArrow usage = usages.get(parent_id);
                 if (usage != null) {
                     Node geometry = CdUtils.getChildNode(cell, "mxGeometry");
-                    double x = Double.parseDouble(getAttr(geometry, "x"));
+                    double x = Double.parseDouble(CdUtils.getAttribute(geometry, "x"));
                     if (x < -0.8) {
-                        usage.setSourceCardinality(getAttr(cell, "value"));
+                        usage.setSourceCardinality(CdUtils.getAttribute(cell, "value"));
                     } else {
                         if (x > 0.8) {
-                            usage.setTargetCardinality(getAttr(cell, "value"));
+                            usage.setTargetCardinality(CdUtils.getAttribute(cell, "value"));
                         } else {
-                            usage.setLabel(getAttr(cell, "value"));
+                            usage.setLabel(CdUtils.getAttribute(cell, "value"));
                         }
                     }
                 }
