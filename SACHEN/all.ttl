@@ -14,7 +14,7 @@
 
 <#ClassMapping> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "SACHEN/test.xml" ;
+    rml:source "SACHEN/test-broken-arrows.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
     rml:iterator "*"
   ];
@@ -49,6 +49,20 @@
   rr:subjectMap [
     rr:template "http://example.com/Attributes/{name}" ;
     rr:class cd:Attribute
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:Datatype;
+    rr:objectMap [
+      rml:reference "type"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate cd:Modifier;
+    rr:objectMap [
+      rml:reference "modifier"
+    ]
   ];
 
   rr:predicateObjectMap [

@@ -89,47 +89,47 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
         }
 
         for (CdClass clazz : classSelection) {
-            // Now see which records were actually requestes
+            // Now see which records were actually requested
             // Case 1: Classes
             if (iteratorWords.length == 1) {
                 res.add(new ClassDiagramRecord(clazz));
-            }
-
-            if (iteratorWords.length == 3) {
-                // Case 2: Attributes
-                if (iteratorWords[0].equals("attributes") && iteratorWords[1].equals("of")) {
-                    for (CdAttribute attr : clazz.attributes) {
-                        res.add(new ClassDiagramRecord(attr));
-                    }
-                } else {
-                    // Case 3: usages or other arrows
-                    // Must be arrow - either usages to catch all or specific arrow type
-                    List<CdArrow> arrows = null;
-                    if (iteratorWords[1].equals(OF)) {
-                        arrows = clazz.uses;
+            } else {
+                if (iteratorWords.length == 3) {
+                    // Case 2: Attributes
+                    if (iteratorWords[0].equals("attributes") && iteratorWords[1].equals("of")) {
+                        for (CdAttribute attr : clazz.attributes) {
+                            res.add(new ClassDiagramRecord(attr));
+                        }
                     } else {
-                        if (iteratorWords[1].equals(BY)) {
+                        // Case 3: usages or other arrows
+                        // Must be arrow - either usages to catch all or specific arrow type
+                        List<CdArrow> arrows = null;
+                        if (iteratorWords[1].equals(OF)) {
                             arrows = clazz.usedBy;
                         } else {
-                            throw new Exception("Second iterator word not 'of' or 'by'");
+                            if (iteratorWords[1].equals(BY)) {
+                                arrows = clazz.uses;
+                            } else {
+                                throw new Exception("Second iterator word not 'of' or 'by'");
+                            }
                         }
-                    }
 
-                    if (iteratorWords[0].equals("usages")) {
-                        for (CdArrow usage : arrows) {
-                            res.add(new ClassDiagramRecord(usage));
-                        }
-                    } else {
-                        CdArrowType type = arrowMapping.get(iteratorWords[0]);
-                        for (CdArrow usage : arrows) {
-                            if (usage.type == type) {
+                        if (iteratorWords[0].equals("usages")) {
+                            for (CdArrow usage : arrows) {
                                 res.add(new ClassDiagramRecord(usage));
+                            }
+                        } else {
+                            CdArrowType type = arrowMapping.get(iteratorWords[0]);
+                            for (CdArrow usage : arrows) {
+                                if (usage.type == type) {
+                                    res.add(new ClassDiagramRecord(usage));
+                                }
                             }
                         }
                     }
+                } else {
+                    throw new Exception("Iterator malformed: Not 1 or 3 words");
                 }
-            } else {
-                throw new Exception("Iterator malformed: Not 1 or 3 words");
             }
         }
 

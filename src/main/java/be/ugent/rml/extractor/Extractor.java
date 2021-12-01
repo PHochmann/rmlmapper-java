@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface Extractor {
 
-    List<Object> extract(Record record);
+    List<Object> extract(Record record) throws Exception;
 }

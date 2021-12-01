@@ -12,7 +12,7 @@ public abstract class Record {
      * @param value the reference for which objects need to be returned.
      * @return a list of objects for the reference.
      */
-    public abstract List<Object> get(String value);
+    public abstract List<Object> get(String value) throws Exception;
 
     /**
      * This method returns the datatype of a reference in the record.

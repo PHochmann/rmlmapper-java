@@ -28,7 +28,7 @@ public class CdAttribute extends CdElement {
             } else {
                 if (words.length == 3) {
                     name = words[1];
-                    if (name.endsWith(":")) name = name.substring(0, name.length() - 2);
+                    if (name.endsWith(":")) name = name.substring(0, name.length() - 1);
                     type = words[2];
                     modifier = words[0];
                 }
@@ -36,7 +36,7 @@ public class CdAttribute extends CdElement {
         }
     }
 
-    public String get(String ref) {
+    public String get(String ref) throws Exception {
         if (ref.equals("id")) {
             return id;
         } else {
@@ -52,7 +52,7 @@ public class CdAttribute extends CdElement {
                         if (ref.startsWith("class.")) {
                             return clazz.get(ref.substring(ref.indexOf(".") + 1));
                         } else {
-                            return null;
+                            throw new Exception("Invalid reference for attribute");
                         }
                     }
                 }

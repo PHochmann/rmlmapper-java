@@ -27,11 +27,11 @@ public class ConcatFunction implements SingleRecordFunctionExecutor {
     }
 
     @Override
-    public List<?> execute(Record record) {
+    public List<?> execute(Record record) throws Exception {
        return concat(record);
     }
 
-    private List<String> concat(Record record) {
+    private List<String> concat(Record record) throws Exception {
         ArrayList<String> results = new ArrayList<>();
         results.add("");
 

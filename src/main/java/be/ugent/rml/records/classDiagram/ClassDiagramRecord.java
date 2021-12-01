@@ -24,7 +24,7 @@ public class ClassDiagramRecord extends Record {
     }
 
     @Override
-    public List<Object> get(String ref) {
+    public List<Object> get(String ref) throws Exception {
 
         if (clazz != null) {
             return Collections.singletonList(clazz.get(ref));

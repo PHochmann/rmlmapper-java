@@ -21,7 +21,7 @@ public class ReferenceExtractor implements Extractor, SingleRecordFunctionExecut
     }
 
     @Override
-    public List<Object> extract(Record record) {
+    public List<Object> extract(Record record) throws Exception {
         String temp = this.reference;
 
         if (ignoreDoubleQuotes && temp.startsWith("\"") && temp.endsWith("\"")) {
@@ -37,7 +37,7 @@ public class ReferenceExtractor implements Extractor, SingleRecordFunctionExecut
     }
 
     @Override
-    public Object execute(Record record) throws IOException {
+    public Object execute(Record record) throws Exception {
         return extract(record);
     }
 }
