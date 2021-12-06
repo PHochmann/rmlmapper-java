@@ -16,11 +16,11 @@
   rml:logicalSource [
     rml:source "SACHEN/test-broken-arrows.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
-    rml:iterator "usages by Address.userClasses"
+    rml:iterator "attributes of Student where type is Double"
   ];
 
   rr:subjectMap [
-    rr:template "http://example.com/{target.name}" ;
+    rr:template "http://example.com/{name}" ;
     rr:class ex:Class
   ].
 
