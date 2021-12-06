@@ -1,1 +1,1 @@
-<http://example.com/AverageMark> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Class>.
+<http://example.com/Country> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Class>.

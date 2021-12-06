@@ -3,7 +3,7 @@ package be.ugent.rml.records.classDiagram;
 import org.w3c.dom.Node;
 
 public class CdAttribute extends CdElement {
-    String modifier;
+    String visibility;
     String type;
     String name;
     CdAttributeType attrib_type;
@@ -19,18 +19,18 @@ public class CdAttribute extends CdElement {
         if (words.length == 1) {
             name = words[0];
             type = "";
-            modifier = "";
+            visibility = "";
         } else {
             if (words.length == 2) {
                 name = words[1];
                 type = words[0];
-                modifier = "";
+                visibility = "";
             } else {
                 if (words.length == 3) {
                     name = words[1];
                     if (name.endsWith(":")) name = name.substring(0, name.length() - 1);
                     type = words[2];
-                    modifier = words[0];
+                    visibility = words[0];
                 }
             }
         }
@@ -46,18 +46,24 @@ public class CdAttribute extends CdElement {
                 if (ref.equals("type")) {
                     return type;
                 } else {
-                    if (ref.equals("modifier")) {
-                        return modifier;
+                    if (ref.equals("visibility")) {
+                        return visibility;
                     } else {
-                        if (ref.startsWith("class.")) {
-                            return clazz.get(ref.substring(ref.indexOf(".") + 1));
+                        if (ref.equals("isFunction")) {
+                            return attrib_type == CdAttributeType.CD_FUNCTION ? "true" : "false";
                         } else {
-                            throw new Exception("Invalid reference for attribute");
+                            if (ref.startsWith("class.")) {
+                                return clazz.get(ref.substring(ref.indexOf(".") + 1));
+                            } else {
+                                throw new Exception("Invalid reference for attribute");
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+
 
 }

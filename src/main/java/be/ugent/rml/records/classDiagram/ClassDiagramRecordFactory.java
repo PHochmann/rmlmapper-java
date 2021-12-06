@@ -22,6 +22,7 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
     final String BY = "by";
     final String WHERE = "where";
     final String IS = "is";
+    final String AND = "and";
 
     Dictionary<String, CdArrowType> arrowMapping;
 
@@ -154,18 +155,25 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
 
             List<Record> filteredRes = new LinkedList<>();
 
-            if (iteratorWords.length != whereIndex + 4) {
-                throw new Exception("Where-clause malformed");
-            }
-            if (!iteratorWords[whereIndex + 2].equals(IS)) {
-                throw new Exception("No 'is' in where-clause");
-            }
-
-            String reference = iteratorWords[whereIndex + 1];
-            String rhs = iteratorWords[whereIndex + 3];
-
             for (Record r : res) {
-                if (r.get(reference).equals(Collections.singletonList(rhs))) {
+                boolean inResult = true;
+                for (int i = whereIndex; i < iteratorWords.length; i += 4) {
+                    if (!iteratorWords[whereIndex + 2].equals(IS)) {
+                        throw new Exception("No 'is' in where-clause");
+                    }
+                    if (iteratorWords.length != i + 4 && !iteratorWords[i + 4].equals(AND)) {
+                        throw new Exception("Where-clause malformed");
+                    }
+
+                    String reference = iteratorWords[i + 1];
+                    String rhs = iteratorWords[i + 3];
+
+                    if (!r.get(reference).equals(Collections.singletonList(rhs))) {
+                        inResult = false;
+                        break;
+                    }
+                }
+                if (inResult) {
                     filteredRes.add(r);
                 }
             }

@@ -22,7 +22,7 @@ public class CdClass extends CdElement {
     }
 
     String name;
-    boolean interf;
+    boolean isInterface;
     CdClass base;
     double separatorY;
     List<CdClass> children;
@@ -31,10 +31,10 @@ public class CdClass extends CdElement {
     List<CdAttribute> attributes;
     Rectangle rect;
 
-    public CdClass(Node node, boolean interf) {
+    public CdClass(Node node, boolean isInterface) {
         super(node);
         this.name = node.getAttributes().getNamedItem("value").getTextContent();
-        this.interf = interf;
+        this.isInterface = isInterface;
         this.children = new LinkedList<>();
         this.uses = new LinkedList<>();
         this.usedBy = new LinkedList<>();
@@ -80,11 +80,15 @@ public class CdClass extends CdElement {
             if (ref.equals("name")) {
                 return name;
             } else {
-                if (ref.startsWith("base.")) {
-                    if (base == null) return null;
-                    return base.get(ref.substring(ref.indexOf(".") + 1));
+                if (ref.equals("isInterface")) {
+                    return isInterface ? "true" : "false";
                 } else {
-                    return null;
+                    if (ref.startsWith("base.")) {
+                        if (base == null) return null;
+                        return base.get(ref.substring(ref.indexOf(".") + 1));
+                    } else {
+                        return null;
+                    }
                 }
             }
         }
