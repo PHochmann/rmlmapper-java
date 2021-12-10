@@ -20,6 +20,9 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
 
     final String OF = "of";
     final String BY = "by";
+    final String WHERE = "where";
+    final String IS = "is";
+    final String AND = "and";
 
     Dictionary<String, CdArrowType> arrowMapping;
 
@@ -52,8 +55,24 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
         List<CdClass> classSelection = new LinkedList<>();
 
         String[] iteratorWords = iterator.trim().split(" ");
+        int whereIndex = -1;
+        for (int i = 0; i < iteratorWords.length; i++) {
+            if (iteratorWords[i].equals(WHERE)) whereIndex = i;
+        }
 
-        String classSelectorString = iteratorWords[iteratorWords.length - 1];
+        int classSelectorIndex = -1;
+        String classSelectorString = null;
+
+        if (whereIndex == -1) {
+            classSelectorIndex = iteratorWords.length - 1;
+        } else {
+            classSelectorIndex = whereIndex - 1;
+        }
+
+        if (classSelectorIndex < 0) throw new Exception("ClassSelector not found");
+
+        classSelectorString = iteratorWords[classSelectorIndex];
+
         String[] steps = classSelectorString.split("\\.");
         if (steps.length == 0) {
             throw new Exception("Iterator is malformed: Empty string");
@@ -91,50 +110,78 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
         for (CdClass clazz : classSelection) {
             // Now see which records were actually requested
             // Case 1: Classes
-            if (iteratorWords.length == 1) {
+            if (classSelectorIndex == 0) {
                 res.add(new ClassDiagramRecord(clazz));
             } else {
-                if (iteratorWords.length == 3) {
-                    // Case 2: Attributes
-                    if (iteratorWords[0].equals("attributes") && iteratorWords[1].equals("of")) {
-                        for (CdAttribute attr : clazz.attributes) {
-                            res.add(new ClassDiagramRecord(attr));
+                // Case 2: Attributes
+                if (iteratorWords[0].equals("attributes") && iteratorWords[1].equals("of")) {
+                    for (CdAttribute attr : clazz.attributes) {
+                        res.add(new ClassDiagramRecord(attr));
+                    }
+                } else {
+                    // Case 3: usages or other arrows
+                    // Must be arrow - either usages to catch all or specific arrow type
+                    List<CdArrow> arrows = null;
+                    if (iteratorWords[1].equals(OF)) {
+                        arrows = clazz.usedBy;
+                    } else {
+                        if (iteratorWords[1].equals(BY)) {
+                            arrows = clazz.uses;
+                        } else {
+                            throw new Exception("Second iterator word not 'of' or 'by'");
+                        }
+                    }
+
+                    if (iteratorWords[0].equals("usages")) {
+                        for (CdArrow usage : arrows) {
+                            res.add(new ClassDiagramRecord(usage));
                         }
                     } else {
-                        // Case 3: usages or other arrows
-                        // Must be arrow - either usages to catch all or specific arrow type
-                        List<CdArrow> arrows = null;
-                        if (iteratorWords[1].equals(OF)) {
-                            arrows = clazz.usedBy;
-                        } else {
-                            if (iteratorWords[1].equals(BY)) {
-                                arrows = clazz.uses;
-                            } else {
-                                throw new Exception("Second iterator word not 'of' or 'by'");
-                            }
-                        }
+                        CdArrowType type = arrowMapping.get(iteratorWords[0]);
+                        if (type == null) throw new Exception("Unknown prefix");
 
-                        if (iteratorWords[0].equals("usages")) {
-                            for (CdArrow usage : arrows) {
+                        for (CdArrow usage : arrows) {
+                            if (usage.type == type) {
                                 res.add(new ClassDiagramRecord(usage));
-                            }
-                        } else {
-                            CdArrowType type = arrowMapping.get(iteratorWords[0]);
-                            for (CdArrow usage : arrows) {
-                                if (usage.type == type) {
-                                    res.add(new ClassDiagramRecord(usage));
-                                }
                             }
                         }
                     }
-                } else {
-                    throw new Exception("Iterator malformed: Not 1 or 3 words");
                 }
             }
         }
 
-        return res;
+        // Last step: Filter records according to where-clause
+        if (whereIndex != -1) {
 
+            List<Record> filteredRes = new LinkedList<>();
+
+            for (Record r : res) {
+                boolean inResult = true;
+                for (int i = whereIndex; i < iteratorWords.length; i += 4) {
+                    if (!iteratorWords[whereIndex + 2].equals(IS)) {
+                        throw new Exception("No 'is' in where-clause");
+                    }
+                    if (iteratorWords.length != i + 4 && !iteratorWords[i + 4].equals(AND)) {
+                        throw new Exception("Where-clause malformed");
+                    }
+
+                    String reference = iteratorWords[i + 1];
+                    String rhs = iteratorWords[i + 3];
+
+                    if (!r.get(reference).equals(Collections.singletonList(rhs))) {
+                        inResult = false;
+                        break;
+                    }
+                }
+                if (inResult) {
+                    filteredRes.add(r);
+                }
+            }
+
+            return filteredRes;
+        } else {
+            return res;
+        }
     }
 
 }

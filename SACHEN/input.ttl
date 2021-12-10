@@ -5,23 +5,19 @@
 @prefix schema: <http://schema.org/>.
 
 @prefix cdrml: <http://cdrml.thisisnourl/cdrml#>.
-@prefix fno: <https://w3id.org/function/ontology#> .
-@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
-@prefix fnoi: <https://w3id.org/function/vocabulary/implementation#> .
 @prefix ex: <http://example.com#>.
-
 @base <http://example.com/ns#>.
 
 <#ClassDiagramMapping> a rr:TriplesMap;
   rml:logicalSource [
     rml:source "SACHEN/test-broken-arrows.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
-    rml:iterator "usages by Address.userClasses"
+    rml:iterator "attributes of Address where type is Enum and visibility is +"
   ];
 
   rr:subjectMap [
-    rr:template "http://example.com/{target.name}" ;
-    rr:class ex:Class
+    rr:template "http://example.com/{name}" ;
+    rr:class ex:Attribute
   ].
 
   #rr:predicateObjectMap [

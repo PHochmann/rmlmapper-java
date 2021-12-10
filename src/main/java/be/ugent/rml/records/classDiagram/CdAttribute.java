@@ -49,15 +49,21 @@ public class CdAttribute extends CdElement {
                     if (ref.equals("visibility")) {
                         return visibility;
                     } else {
-                        if (ref.startsWith("class.")) {
-                            return clazz.get(ref.substring(ref.indexOf(".") + 1));
+                        if (ref.equals("isFunction")) {
+                            return attrib_type == CdAttributeType.CD_FUNCTION ? "true" : "false";
                         } else {
-                            throw new Exception("Invalid reference for attribute");
+                            if (ref.startsWith("class.")) {
+                                return clazz.get(ref.substring(ref.indexOf(".") + 1));
+                            } else {
+                                throw new Exception("Invalid reference for attribute");
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+
 
 }
