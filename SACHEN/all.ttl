@@ -61,7 +61,7 @@
   rr:predicateObjectMap [
     rr:predicate cd:Modifier;
     rr:objectMap [
-      rml:reference "modifier"
+      rml:reference "visibility"
     ]
   ];
 
