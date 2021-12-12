@@ -12,7 +12,7 @@
   rml:logicalSource [
     rml:source "SACHEN/test-broken-arrows.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
-    rml:iterator "attributes of Address where type is Enum and visibility is +"
+    rml:iterator "attributes of Address where type != Enum or visibility != +"
   ];
 
   rr:subjectMap [

@@ -73,7 +73,7 @@ public class CdClass extends CdElement {
         this.separatorY = y;
     }
 
-    public String get(String ref) {
+    public String get(String ref) throws Exception {
         if (ref.equals("id")) {
             return id;
         } else {
@@ -84,10 +84,10 @@ public class CdClass extends CdElement {
                     return isInterface ? "true" : "false";
                 } else {
                     if (ref.startsWith("base.")) {
-                        if (base == null) return null;
+                        if (base == null) return "NULL";
                         return base.get(ref.substring(ref.indexOf(".") + 1));
                     } else {
-                        return null;
+                        throw new Exception("Invalid reference for class.");
                     }
                 }
             }
@@ -98,10 +98,16 @@ public class CdClass extends CdElement {
         Node geometry = CdUtils.getChildNode(this.node, "mxGeometry");
         if (geometry == null) return;
 
-        this.rect = new Rectangle(Double.parseDouble(CdUtils.getAttribute(geometry, "x")),
-                Double.parseDouble(CdUtils.getAttribute(geometry, "y")),
-                Double.parseDouble(CdUtils.getAttribute(geometry, "width")),
-                Double.parseDouble(CdUtils.getAttribute(geometry, "height")));
+        String x = CdUtils.getAttribute(geometry, "x");
+        String y = CdUtils.getAttribute(geometry, "y");
+        String width = CdUtils.getAttribute(geometry, "width");
+        String height = CdUtils.getAttribute(geometry, "height");
+
+        this.rect = new Rectangle(
+                x != null ? Double.parseDouble(x) : 0,
+                y != null ? Double.parseDouble(y) : 0,
+                width != null ? Double.parseDouble(width) : 0,
+                height != null ? Double.parseDouble(height) : 0);
     }
 
     public double getDistanceToBox(double x, double y) {

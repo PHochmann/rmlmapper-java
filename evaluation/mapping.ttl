@@ -1,0 +1,121 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix rml: <http://semweb.mmlab.be/ns/rml#>.
+@prefix ql: <http://semweb.mmlab.be/ns/ql#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix schema: <http://schema.org/>.
+@prefix cdrml: <http://cdrml.thisisnourl/cdrml#>.
+@prefix fp: <http://www.example.org/ontologies/domain/factory_planning#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+@prefix : <http://www.example.org/ontologies/task/capacity_planning#> .
+@base <http://www.example.org/ontologies/task/capacity_planning#> .
+
+<#ClassMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "evaluation/data.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "*"
+  ];
+
+  rr:subjectMap [
+    rr:template "http://www.example.org/lololo/task/capacity_planning/{name}" ;
+    rr:class owl:Class
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate rdfs:subClassOf ;
+    rr:objectMap [
+      rr:template "http://www.example.org/ontologies/task/capacity_planning/{base.name}" ;
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate rdfs:subClassOf ;
+    rr:objectMap [
+      rr:parentTriplesMap :RelationshipMapping ;
+      rr:joinCondition [
+        rr:child "name" ;
+        rr:parent "source.name"
+      ]
+    ]
+  ] .
+
+<#PropertyMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "evaluation/data.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "usages of *"
+  ];
+
+  rr:subjectMap [
+    rr:template "http://www.example.org/ontologies/domain/factory_planning#{label}" ;
+    rr:class owl:DatatypeProperty
+  ].
+
+<#RelationshipMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "evaluation/data.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "usages of *"
+  ];
+
+  rr:subjectMap [
+    rr:class owl:Restriction;
+    rr:termType rr:BlankNode
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate owl:onProperty ;
+    rr:objectMap [
+      rr:template "http://www.example.org/ontologies/domain/factory_planning#{label}" ;
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate owl:someValuesOf ;
+    rr:objectMap [
+      rr:template "http://www.example.org/rrrr/task/capacity_planning/{target.name}" ;
+    ]
+  ].
+
+<#AttributeMapping> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "evaluation/data.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "attributes of *"
+  ];
+
+  rr:subjectMap [
+    rr:template "http://www.example.org/ontologies/task/capacity_planning#{name}" ;
+    rr:class owl:DatatypeProperty
+  ].
+
+<#AttributeRestrictionsMap> a rr:TriplesMap;
+  rml:logicalSource [
+    rml:source "evaluation/data.xml" ;
+    rml:referenceFormulation cdrml:cdQL ;
+    rml:iterator "attributes of *"
+  ];
+
+  rr:subjectMap [
+    rr:class owl:Restriction;
+    rr:termType rr:BlankNode
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate owl:onProperty ;
+    rr:objectMap [
+      rr:parentTriplesMap :AttributeMapping ;
+      rr:joinCondition [
+        rr:child "name" ;
+        rr:parent "name"
+      ]
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate owl:someValuesOf ;
+    rr:objectMap [
+      rr:template "http://www.w3.org/2001/XMLSchema#{type}" ;
+    ]
+  ].

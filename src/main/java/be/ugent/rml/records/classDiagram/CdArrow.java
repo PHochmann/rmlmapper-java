@@ -2,21 +2,20 @@ package be.ugent.rml.records.classDiagram;
 
 import org.w3c.dom.Node;
 
-import java.util.Collections;
-
 public class CdArrow extends CdElement {
     CdClass source;
     CdClass target;
     String label;
     String source_cardinality;
     String target_cardinality;
-    CdArrowType type;
+    CdArrowStyle style;
 
     public CdArrow(Node node, CdClass source, CdClass target) {
         super(node);
         this.source = source;
         this.target = target;
-        this.type = getTypeFromStyle(node);
+        this.style = getArrowStyle(node);
+        this.label = CdUtils.getAttribute(node, "value");
         source.addUse(this);
     }
 
@@ -32,7 +31,7 @@ public class CdArrow extends CdElement {
         this.target_cardinality = value;
     }
 
-    public String get(String ref) {
+    public String get(String ref) throws Exception {
         if (ref.equals("id")) {
             return id;
         } else {
@@ -45,8 +44,8 @@ public class CdArrow extends CdElement {
                     if (ref.equals("targetCardinality")) {
                         return target_cardinality;
                     } else {
-                        if (ref.equals("type")) {
-                            return arrowTypeToString(this.type);
+                        if (ref.equals("style")) {
+                            return arrowTypeToString(this.style);
                         } else {
                             if (ref.startsWith("source.")) {
                                 return source.get(ref.substring(ref.indexOf(".") + 1));
@@ -54,7 +53,7 @@ public class CdArrow extends CdElement {
                                 if (ref.startsWith("target.")) {
                                     return target.get(ref.substring(ref.indexOf(".") + 1));
                                 } else {
-                                    return null;
+                                    throw new Exception("Malformed reference for arrow : '" + ref + "'");
                                 }
                             }
                         }
@@ -64,31 +63,31 @@ public class CdArrow extends CdElement {
         }
     }
 
-    private CdArrowType getTypeFromStyle(Node node) {
+    private CdArrowStyle getArrowStyle(Node node) {
         String startArrow = CdUtils.getStyle(node, "startArrow");
         String endArrow = CdUtils.getStyle(node, "endArrow");
         String dashed = CdUtils.getStyle(node, "dashed");
 
         if (endArrow != null && dashed != null && endArrow.equals("open") && dashed.equals("1")) {
-            return CdArrowType.CD_ARROW_DEPENDENCY;
+            return CdArrowStyle.CD_ARROW_DEPENDENCY;
         } else {
             if (endArrow != null && dashed != null && endArrow.equals("open") && dashed.equals("0")) {
-                return CdArrowType.CD_ARROW_ASSOCIATION;
+                return CdArrowStyle.CD_ARROW_ASSOCIATION;
             } else {
                 if (endArrow != null && startArrow != null && endArrow.equals("open") && startArrow.equals("diamondThin")) {
                     if (CdUtils.getStyle(node, "startFill").equals("1")) {
-                        return CdArrowType.CD_ARROW_COMPOSITION;
+                        return CdArrowStyle.CD_ARROW_COMPOSITION;
                     } else {
-                        return CdArrowType.CD_ARROW_AGGREGATION;
+                        return CdArrowStyle.CD_ARROW_AGGREGATION;
                     }
                 }
             }
         }
 
-        return CdArrowType.CD_ARROW_UNKNOWN;
+        return CdArrowStyle.CD_ARROW_UNKNOWN;
     }
 
-    private String arrowTypeToString(CdArrowType type) {
+    private String arrowTypeToString(CdArrowStyle type) {
         switch (type) {
             case CD_ARROW_AGGREGATION:
                 return "Aggregation";

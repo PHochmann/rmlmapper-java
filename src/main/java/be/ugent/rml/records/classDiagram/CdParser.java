@@ -127,9 +127,11 @@ public class CdParser {
 
                         CdClass parent = classes.get(parent_id);
                         if (parent != null) {
-                            CdAttribute attr = new CdAttribute(cell, parent.getAttributeType(y));
-                            parent.addAttribute(attr);
-                            attributes.put(attr.id, attr);
+                            List<CdAttribute> attrs = CdAttribute.getAttributes(cell, parent.getAttributeType(y));
+                            for (CdAttribute attr : attrs) {
+                                parent.addAttribute(attr);
+                                attributes.put(attr.id, attr);
+                            }
                         }
                     } else {
                         throw new Exception("Text without parent");

@@ -8,7 +8,6 @@ import be.ugent.rml.records.ReferenceFormulationRecordFactory;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
-import org.rdfhdt.hdt.iterator.utils.Iter;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -21,17 +20,19 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
     final String OF = "of";
     final String BY = "by";
     final String WHERE = "where";
-    final String IS = "is";
+    final String IS = "==";
+    final String ISNOT = "!=";
     final String AND = "and";
+    final String OR = "or";
 
-    Dictionary<String, CdArrowType> arrowMapping;
+    Dictionary<String, CdArrowStyle> arrowMapping;
 
     public ClassDiagramRecordFactory() {
         arrowMapping = new Hashtable<>();
-        arrowMapping.put("associations", CdArrowType.CD_ARROW_ASSOCIATION);
-        arrowMapping.put("aggregations", CdArrowType.CD_ARROW_AGGREGATION);
-        arrowMapping.put("compositions", CdArrowType.CD_ARROW_COMPOSITION);
-        arrowMapping.put("dependencies", CdArrowType.CD_ARROW_DEPENDENCY);
+        arrowMapping.put("associations", CdArrowStyle.CD_ARROW_ASSOCIATION);
+        arrowMapping.put("aggregations", CdArrowStyle.CD_ARROW_AGGREGATION);
+        arrowMapping.put("compositions", CdArrowStyle.CD_ARROW_COMPOSITION);
+        arrowMapping.put("dependencies", CdArrowStyle.CD_ARROW_DEPENDENCY);
     }
 
     @Override
@@ -137,11 +138,11 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
                             res.add(new ClassDiagramRecord(usage));
                         }
                     } else {
-                        CdArrowType type = arrowMapping.get(iteratorWords[0]);
+                        CdArrowStyle type = arrowMapping.get(iteratorWords[0]);
                         if (type == null) throw new Exception("Unknown prefix");
 
                         for (CdArrow usage : arrows) {
-                            if (usage.type == type) {
+                            if (usage.style == type) {
                                 res.add(new ClassDiagramRecord(usage));
                             }
                         }
@@ -158,19 +159,39 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
             for (Record r : res) {
                 boolean inResult = true;
                 for (int i = whereIndex; i < iteratorWords.length; i += 4) {
-                    if (!iteratorWords[whereIndex + 2].equals(IS)) {
-                        throw new Exception("No 'is' in where-clause");
+                    if (!iteratorWords[whereIndex + 2].equals(IS) && !iteratorWords[whereIndex + 2].equals(ISNOT)) {
+                        throw new Exception("Missing comparison in where-clause");
                     }
-                    if (iteratorWords.length != i + 4 && !iteratorWords[i + 4].equals(AND)) {
+                    if (iteratorWords.length != i + 4 && !(iteratorWords[i + 4].equals(AND) || iteratorWords[i + 4].equals(OR))) {
                         throw new Exception("Where-clause malformed");
                     }
 
+                    String logicalOp = iteratorWords[i];
                     String reference = iteratorWords[i + 1];
+                    String comparison = iteratorWords[i + 2];
                     String rhs = iteratorWords[i + 3];
 
-                    if (!r.get(reference).equals(Collections.singletonList(rhs))) {
-                        inResult = false;
-                        break;
+                    if (logicalOp.equals(OR)) {
+                        if (inResult) {
+                            break;
+                        } else {
+                            inResult = true;
+                        }
+                    } else {
+                        if (!inResult) {
+                            continue;
+                        }
+                    }
+
+                    if (comparison.equals(IS)) {
+                        if (!r.get(reference).equals(Collections.singletonList(rhs))) {
+                            inResult = false;
+                        }
+                    }
+                    else {
+                        if (r.get(reference).equals(Collections.singletonList(rhs))) {
+                            inResult = false;
+                        }
                     }
                 }
                 if (inResult) {

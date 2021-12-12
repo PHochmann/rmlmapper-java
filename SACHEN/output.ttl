@@ -1,1 +1,5 @@
-<http://example.com/Country> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Class>.
+<http://example.com/Street> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Attribute>.
+<http://example.com/City> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Attribute>.
+<http://example.com/State> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Attribute>.
+<http://example.com/PostalCode> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Attribute>.
+<http://example.com/validate%28%29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com#Attribute>.

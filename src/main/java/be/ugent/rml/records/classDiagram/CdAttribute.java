@@ -2,6 +2,9 @@ package be.ugent.rml.records.classDiagram;
 
 import org.w3c.dom.Node;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class CdAttribute extends CdElement {
     String visibility;
     String type;
@@ -9,31 +12,44 @@ public class CdAttribute extends CdElement {
     CdAttributeType attrib_type;
     CdClass clazz;
 
-    public CdAttribute(Node node, CdAttributeType attrib_type) {
+    // Needed because linebreaks could be used to create multiple attributes from one text label
+    public static List<CdAttribute> getAttributes(Node node, CdAttributeType attrib_type) {
+        String totalText = node.getAttributes().getNamedItem("value").getTextContent();
+        String[] texts = totalText.split("%0A|&#xa;|\n");
+        List<CdAttribute> res = new LinkedList<>();
+        for (String str : texts) {
+            if (!str.equals("")) {
+                res.add(new CdAttribute(node, str, attrib_type));
+            }
+        }
+        return res;
+    }
+
+    private CdAttribute(Node node, String text, CdAttributeType attrib_type) {
         super(node);
         this.attrib_type = attrib_type;
 
-        this.name = node.getAttributes().getNamedItem("value").getTextContent();
+        this.name = text;
 
-        String[] words = node.getAttributes().getNamedItem("value").getTextContent().split(" ");
+        String[] words = text.split(" ");
         if (words.length == 1) {
             name = words[0];
             type = "";
             visibility = "";
         } else {
             if (words.length == 2) {
-                name = words[1];
-                type = words[0];
+                name = words[0];
+                type = words[1];
                 visibility = "";
             } else {
                 if (words.length == 3) {
                     name = words[1];
-                    if (name.endsWith(":")) name = name.substring(0, name.length() - 1);
                     type = words[2];
                     visibility = words[0];
                 }
             }
         }
+        if (name.endsWith(":")) name = name.substring(0, name.length() - 1);
     }
 
     public String get(String ref) throws Exception {

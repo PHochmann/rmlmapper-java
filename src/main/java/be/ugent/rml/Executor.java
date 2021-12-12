@@ -229,7 +229,7 @@ public class Executor {
                         });
                     });
 
-                    List<PredicateObjectGraph> pogs = this.generatePredicateObjectGraphs(mapping, record, subjectGraphs);
+                    List<PredicateObjectGraph> pogs = this.generatePredicateObjectGraphs(mapping, record, subjectGraphs, j);
 
                     pogs.forEach(pog -> pogFunction.accept(finalSubject, pog));
                 }
@@ -250,7 +250,7 @@ public class Executor {
     }
 
 
-    private List<PredicateObjectGraph> generatePredicateObjectGraphs(Mapping mapping, Record record, List<ProvenancedTerm> alreadyNeededGraphs) throws Exception {
+    private List<PredicateObjectGraph> generatePredicateObjectGraphs(Mapping mapping, Record record, List<ProvenancedTerm> alreadyNeededGraphs, int index) throws Exception {
         ArrayList<PredicateObjectGraph> results = new ArrayList<>();
 
         List<PredicateObjectGraphMapping> predicateObjectGraphMappings = mapping.getPredicateObjectGraphMappings();
@@ -294,7 +294,8 @@ public class Executor {
                     objects = this.getIRIsWithConditions(record, pogMapping.getParentTriplesMap(), pogMapping.getJoinConditions());
                     //this.generateTriples(subject, po.getPredicateGenerator(), objects, record, combinedGraphs);
                 } else {
-                    objects = this.getAllIRIs(pogMapping.getParentTriplesMap());
+                    objects = Collections.singletonList(getSubject(pogMapping.getParentTriplesMap(), mapping, record, index));
+                    //objects = getAllIRIs(pogMapping.getParentTriplesMap());
                 }
 
                 results.addAll(combineMultiplePOGs(predicates, objects, poGraphs));
