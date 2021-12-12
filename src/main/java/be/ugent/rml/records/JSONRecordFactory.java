@@ -38,8 +38,6 @@ public class JSONRecordFactory extends IteratorFormat<Object> implements Referen
             logger.warn(e.getMessage() + " for iterator " + iterator, e);
         }
 
-        logger.info("LOL");
-
         return records;
     }
 
