@@ -17,6 +17,7 @@ import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
 import ch.qos.logback.classic.Level;
 import org.apache.commons.cli.*;
+import org.apache.commons.lang.time.StopWatch;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.slf4j.Logger;
@@ -39,8 +40,21 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static final Marker fatal = MarkerFactory.getMarker("FATAL");
 
+
     public static void main(String[] args) {
         main(args, System.getProperty("user.dir"));
+    }
+
+    public static void main(String[] args, String basePath) {
+        // To measure total execution time
+        StopWatch sw = new StopWatch();
+        for (int i = 0; i < 100; i++) {
+            sw.start();
+            actualMain(args, basePath);
+            sw.stop();
+            System.out.print(sw.getTime() + ",");
+            sw.reset();
+        }
     }
 
     /**
@@ -49,7 +63,7 @@ public class Main {
      * @param args     the CLI arguments
      * @param basePath the basePath used during the execution.
      */
-    public static void main(String[] args, String basePath) {
+    public static void actualMain(String[] args, String basePath) {
         Options options = new Options();
         Option mappingdocOption = Option.builder("m")
                 .longOpt("mappingfile")

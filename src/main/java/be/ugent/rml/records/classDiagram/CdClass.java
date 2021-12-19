@@ -121,7 +121,7 @@ public class CdClass extends CdElement {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    public List<CdClass> extractClasses(String selector) {
+    public List<CdClass> extractClasses(String selector) throws Exception {
 
         LinkedList<CdClass> res = new LinkedList<>();
 
@@ -140,6 +140,8 @@ public class CdClass extends CdElement {
                         for (CdArrow usedBy : usedBy) {
                             res.add(usedBy.source);
                         }
+                    } else {
+                        throw new Exception("ClassSelection step invalid: " + selector);
                     }
                 }
             }

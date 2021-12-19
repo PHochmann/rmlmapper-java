@@ -59,7 +59,7 @@ public class CdAttribute extends CdElement {
             if (ref.equals("name")) {
                 return name;
             } else {
-                if (ref.equals("type")) {
+                if (ref.equals("datatype")) {
                     return type;
                 } else {
                     if (ref.equals("visibility")) {

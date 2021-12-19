@@ -1,5 +1,6 @@
 package be.ugent.rml.records.classDiagram;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -156,14 +157,14 @@ public class CdParser {
                     NodeList mxPoints = (NodeList)xpath.evaluate(mxpoints_xpath, cell, XPathConstants.NODESET);
 
                     if (source_id == null) {
-                        System.out.println("Note: No source in arrow, trying to recover...");
+                        //System.out.println("Note: No source in arrow, trying to recover...");
                         for (int j = 0; j < mxPoints.getLength(); j++) {
                             String as_string = CdUtils.getAttribute(mxPoints.item(j), "as");
                             if (as_string != null && as_string.equals("sourcePoint")) {
                                 double x = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "x"));
                                 double y = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "y"));
                                 source = getNearestClass(x, y);
-                                System.out.println("Note: Recovered arrow from " + source.name);
+                                //System.out.println("Note: Recovered arrow from " + source.name);
                                 break;
                             }
                         }
@@ -178,14 +179,14 @@ public class CdParser {
                     }
 
                     if (target_id == null) {
-                        System.out.println("Note: No target in arrow, trying to recover...");
+                        //System.out.println("Note: No target in arrow, trying to recover...");
                         for (int j = 0; j < mxPoints.getLength(); j++) {
                             String as_string = CdUtils.getAttribute(mxPoints.item(j), "as");
                             if (as_string != null && as_string.equals("targetPoint")) {
                                 double x = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "x"));
                                 double y = Double.parseDouble(CdUtils.getAttribute(mxPoints.item(j), "y"));
                                 target = getNearestClass(x, y);
-                                System.out.println("Note: Recovered arrow to " + target.name);
+                                //System.out.println("Note: Recovered arrow to " + target.name);
                                 break;
                             }
                         }
@@ -261,8 +262,9 @@ public class CdParser {
             }
         }
 
-        System.out.println("Done parsing XML document! Classes:" + classes.size() + ", Attribs:" + attributes.size() + ", Usages:" + usages.size());
-        System.out.println("~~");
+
+        //System.out.println("Done parsing XML document! Classes:" + classes.size() + ", Attribs:" + attributes.size() + ", Usages:" + usages.size());
+        //System.out.println("~~");
 
     }
 

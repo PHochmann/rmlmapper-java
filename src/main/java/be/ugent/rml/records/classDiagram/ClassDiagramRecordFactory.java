@@ -8,6 +8,7 @@ import be.ugent.rml.records.ReferenceFormulationRecordFactory;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
+import org.apache.commons.lang.time.StopWatch;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -38,12 +39,23 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
     @Override
     public List<Record> getRecords(Access access, Term logicalSource, QuadStore rmlStore) throws Exception {
 
-        InputStream stream = access.getInputStream();
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xml_doc = builder.parse(stream);
-        CdParser parser = new CdParser(xml_doc);
-        parser.parseClassDiagram();
+        CdParser parser = null;
+        StopWatch sw = new StopWatch();
+        for (int i = 0; i < 1; i++) {
+            sw.start();
+
+            InputStream stream = access.getInputStream();
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = builderFactory.newDocumentBuilder();
+            Document xml_doc = builder.parse(stream);
+
+            parser = new CdParser(xml_doc);
+            parser.parseClassDiagram();
+
+            sw.stop();
+            //System.out.print(sw.getTime() + ",");
+            sw.reset();
+        }
 
         // Now that the xml-Document is parsed to a bunch of Class-Diagram classes, process iterator
         List<Term> iterators = Utils.getObjectsFromQuads(rmlStore.getQuads(logicalSource, new NamedNode(NAMESPACES.RML + "iterator"), null));
@@ -51,6 +63,21 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
         if (iterators.size() > 0) {
             iterator = iterators.get(0).getValue();
         }
+
+        List<Record> res = null;
+        for (int i = 0; i < 1; i++)
+        {
+            sw.start();
+            res = extractRecords(parser, iterator);
+            sw.stop();
+            //System.out.print(sw.getTime() + ",");
+            sw.reset();
+        }
+
+        return res;
+    }
+
+    List<Record> extractRecords(CdParser parser, String iterator) throws Exception {
 
         List<Record> res = new LinkedList<>();
         List<CdClass> classSelection = new LinkedList<>();
@@ -199,10 +226,10 @@ public class ClassDiagramRecordFactory implements ReferenceFormulationRecordFact
                 }
             }
 
-            return filteredRes;
-        } else {
-            return res;
+            res = filteredRes;
         }
+
+        return res;
     }
 
 }

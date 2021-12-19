@@ -10,14 +10,14 @@
 
 <#ClassDiagramMapping> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "SACHEN/test-broken-arrows.xml" ;
+    rml:source "evaluation/scale-diagram.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
-    rml:iterator "attributes of Address where type != Enum or visibility != +"
+    rml:iterator "*"
   ];
 
   rr:subjectMap [
     rr:template "http://example.com/{name}" ;
-    rr:class ex:Attribute
+    rr:class ex:Class
   ].
 
   #rr:predicateObjectMap [

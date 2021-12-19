@@ -12,7 +12,7 @@
 
 <#ClassMapping> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "evaluation/data.xml" ;
+    rml:source "evaluation/ontology-diagram.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
     rml:iterator "*"
   ];
@@ -42,7 +42,7 @@
 
 <#PropertyMapping> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "evaluation/data.xml" ;
+    rml:source "evaluation/ontology-diagram.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
     rml:iterator "usages of *"
   ];
@@ -54,7 +54,7 @@
 
 <#RelationshipMapping> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "evaluation/data.xml" ;
+    rml:source "evaluation/ontology-diagram.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
     rml:iterator "usages of *"
   ];
@@ -80,7 +80,7 @@
 
 <#AttributeMapping> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "evaluation/data.xml" ;
+    rml:source "evaluation/ontology-diagram.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
     rml:iterator "attributes of *"
   ];
@@ -92,7 +92,7 @@
 
 <#AttributeRestrictionsMap> a rr:TriplesMap;
   rml:logicalSource [
-    rml:source "evaluation/data.xml" ;
+    rml:source "evaluation/ontology-diagram.xml" ;
     rml:referenceFormulation cdrml:cdQL ;
     rml:iterator "attributes of *"
   ];
