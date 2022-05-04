@@ -11,6 +11,7 @@ import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.bimserver.client.BimServerClient;
@@ -33,6 +34,8 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
     @Override
     public List<Record> getRecords(Access access, Term logicalSource, QuadStore rmlStore) throws IOException, SQLException, ClassNotFoundException {
         // Interpret result as stream of text
+        StopWatch sw = new StopWatch();
+        sw.start();
         try (InputStream queryResult = access.getInputStream()) {
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -54,6 +57,11 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
             query_project = client.getServiceInterface().getProjectByPoid(query_project.getOid());
 
             ClientIfcModel model = client.getModel(query_project, query_project.getLastRevisionId(), true, false, ((BimServerAccess)access).includeGeometry());
+
+            sw.stop();
+            System.out.println("Filtering in: " + sw.getTime() + " ms");
+            sw.reset();
+            sw.start();
 
             List<Record> query_records = new ArrayList<>();
 
@@ -89,6 +97,8 @@ public class IFCRecordFactory implements ReferenceFormulationRecordFactory {
                 }
             }
 
+            sw.stop();
+            System.out.println("Else in: " + sw.getTime() + " ms");
             return query_records;
 
         } catch (ServerException e) {

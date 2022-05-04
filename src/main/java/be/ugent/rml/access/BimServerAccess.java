@@ -1,5 +1,6 @@
 package be.ugent.rml.access;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.bimserver.client.BimServerClient;
 import org.bimserver.client.json.JsonBimServerClientFactory;
 import org.bimserver.database.queries.om.DefaultQueries;
@@ -83,6 +84,10 @@ public class BimServerAccess implements Access {
     public BimServerClient getClient() { return client; }
 
     public InputStream getInputStream() {
+
+        StopWatch sw = new StopWatch();
+        sw.start();
+
         // Connect to server
         // Creating a factory in a try statement, this makes sure the factory will be closed after use
         JsonBimServerClientFactory factory = null;
@@ -145,6 +150,8 @@ public class BimServerAccess implements Access {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        sw.stop();
+        System.out.println("Checking in: " + sw.getTime() + " ms");
         return result;
     }
 
