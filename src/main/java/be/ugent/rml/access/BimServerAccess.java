@@ -1,6 +1,6 @@
 package be.ugent.rml.access;
 
-import be.ugent.rml.functions.FunctionModel;
+import org.apache.commons.lang.time.StopWatch;
 import org.bimserver.client.BimServerClient;
 import org.bimserver.client.json.JsonBimServerClientFactory;
 import org.bimserver.database.queries.om.DefaultQueries;
@@ -28,19 +28,23 @@ public class BimServerAccess implements Access {
     private String ifcPath;
     private String query;
     private String format;
+    private Boolean geometry;
     private BimServerClient client = null;
 
-    public BimServerAccess(String address, String username, String password, String ifcPath, String query, String format) {
+    public BimServerAccess(String address, String username, String password, String ifcPath, String query, String format, Boolean geometry) {
         this.address = address;
         this.username = username;
         this.password = password;
         this.ifcPath = ifcPath;
-        if (query.equals("")) query = "{ }"; // Query is empty: We have a filtering fuction, query everything
+        if (query.equals("")) query = "{ }"; // Query is empty: We have a filtering function, query everything
         this.query = query;
         this.format = format;
+        this.geometry = geometry;
     }
 
     public String getFormat() { return this.format; }
+
+    public Boolean includeGeometry() { return this.geometry; }
 
     public static SProject checkinFile(String path, String format, BimServerClient client) throws PublicInterfaceNotFoundException, ServerException, UserException {
         try {
@@ -80,6 +84,10 @@ public class BimServerAccess implements Access {
     public BimServerClient getClient() { return client; }
 
     public InputStream getInputStream() {
+
+        StopWatch sw = new StopWatch();
+        sw.start();
+
         // Connect to server
         // Creating a factory in a try statement, this makes sure the factory will be closed after use
         JsonBimServerClientFactory factory = null;
@@ -142,6 +150,8 @@ public class BimServerAccess implements Access {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        sw.stop();
+        System.out.println("Checking in: " + sw.getTime() + " ms");
         return result;
     }
 

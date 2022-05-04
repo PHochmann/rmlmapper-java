@@ -8,12 +8,21 @@ import be.ugent.rml.term.NamedNode;
 import be.ugent.rml.term.Term;
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.atlas.lib.tuple.Tuple;
+import org.bimserver.client.BimServerClient;
+import org.bimserver.client.ClientIfcModel;
+import org.bimserver.client.GeometryException;
+import org.bimserver.database.queries.om.QueryException;
 import org.bimserver.emf.IdEObject;
+import org.bimserver.emf.IfcModelInterfaceException;
 import org.bimserver.models.ifc2x3tc1.IfcRelVoidsElement;
+import org.bimserver.plugins.services.Geometry;
+import org.bimserver.shared.exceptions.ServerException;
+import org.bimserver.shared.exceptions.UserException;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -22,25 +31,63 @@ import java.util.List;
 
 public class ExecutionParser {
 
-    public static List<IFCRecord> filterEntitiesFromBoxDistance(Iterator<IdEObject> entities, int x, int y, int z, int width, int height, int depth, int dist) {
-        return new LinkedList<IFCRecord>();
-    }
-
     private static Object getAttr(EObject obj, String attribute)
     {
         EStructuralFeature ftr = obj.eClass().getEStructuralFeature(attribute);
         return ftr != null ? obj.eGet(ftr) : null;
     }
 
-    public static List<IFCRecord> getOpeningsOfWall(Iterator<IdEObject> entities, String id) {
+    public static List<IFCRecord> filterEntitiesFromBoxDistance(ClientIfcModel model,
+                                                                BimServerClient client,
+                                                                long roid,
+                                                                String id,
+                                                                int dist) throws IfcModelInterfaceException, QueryException, ServerException, GeometryException, UserException, IOException {
 
         List<IFCRecord> res = new LinkedList<>();
 
-        while (entities.hasNext())
+        model.loadGeometry();
+
+        for (IdEObject obj : model) {
+            Object gid = getAttr(obj, "GlobalId");
+            if (gid != null && gid.equals(id)) {
+                Geometry g1 = client.getGeometry(roid, obj);
+                for (IdEObject obj2 : model) {
+                    Geometry g2 = client.getGeometry(roid, obj2);
+                    if (Math.abs(g1.getMaxX() - g2.getMaxX()) < dist
+                        || Math.abs(g1.getMaxX() - g2.getMaxX()) < dist
+                        || Math.abs(g1.getMaxX() - g2.getMaxX()) < dist
+                        || Math.abs(g1.getMaxX() - g2.getMaxY()) < dist
+                        || Math.abs(g1.getMaxX() - g2.getMinX()) < dist
+                        || Math.abs(g1.getMaxX() - g2.getMinY()) < dist
+                        || Math.abs(g1.getMaxY() - g2.getMaxX()) < dist
+                        || Math.abs(g1.getMaxY() - g2.getMaxY()) < dist
+                        || Math.abs(g1.getMaxY() - g2.getMinX()) < dist
+                        || Math.abs(g1.getMaxY() - g2.getMinY()) < dist
+                        || Math.abs(g1.getMinX() - g2.getMaxX()) < dist
+                        || Math.abs(g1.getMinX() - g2.getMaxY()) < dist
+                        || Math.abs(g1.getMinX() - g2.getMinX()) < dist
+                        || Math.abs(g1.getMinX() - g2.getMinY()) < dist
+                        || Math.abs(g1.getMinY() - g2.getMaxX()) < dist
+                        || Math.abs(g1.getMinY() - g2.getMaxY()) < dist
+                        || Math.abs(g1.getMinY() - g2.getMinX()) < dist
+                        || Math.abs(g1.getMinY() - g2.getMinY()) < dist) {
+                            res.add(new IFCRecord(obj2));
+                    }
+                }
+            }
+        }
+        return new LinkedList<IFCRecord>();
+    }
+
+    public static List<IFCRecord> getOpeningsOfWall(ClientIfcModel model, BimServerClient client, long roid, String id) {
+
+        List<IFCRecord> res = new LinkedList<>();
+
+        for (IdEObject obj : model)
         {
-            IdEObject obj = entities.next();
             Object gid = getAttr(obj,"GlobalId");
             if (gid != null && gid.equals(id)) {
+                res.add(new IFCRecord(obj));
                 for (EObject obj2 : obj.eCrossReferences()) {
                     if (obj2.eClass().getName().equals("IfcRelVoidsElement")) {
                         for (EObject obj3 : obj2.eCrossReferences())
@@ -48,6 +95,13 @@ public class ExecutionParser {
                             if (obj3.eClass().getName().equals("IfcOpeningElement"))
                             {
                                 res.add(new IFCRecord(obj3));
+                                for (EObject obj4 : obj3.eCrossReferences()) {
+                                    if (obj4.eClass().getName().equals("IfcRelFillsElement"))
+                                    {
+                                        Object filling = getAttr(obj4, "RelatedBuildingElement");
+                                        if (filling != null) res.add(new IFCRecord((EObject)filling));
+                                    }
+                                }
                             }
                         }
                     }
@@ -87,7 +141,6 @@ public class ExecutionParser {
 
         List<Term> params_list = Utils.getList(store, expectList);
 
-        // Parse list of parameters (https://ontola.io/blog/ordered-data-in-rdf/)
         for (Term first : params_list)
         {
             List<Term> paramPredicates = Utils.getObjectsFromQuads(store.getQuads(first, new NamedNode(NAMESPACES.FNO_S + "predicate"), null));
